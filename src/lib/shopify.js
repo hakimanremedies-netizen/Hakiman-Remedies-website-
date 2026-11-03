@@ -6,6 +6,9 @@ const API_VERSION = '2026-07'
 
 export const shopifyEnabled = Boolean(DOMAIN && TOKEN)
 
+// Shopify-hosted customer accounts (email one-time-code sign-in, orders, addresses).
+export const accountUrl = `https://${DOMAIN}/account`
+
 async function storefront(query, variables = {}) {
   const res = await fetch(`https://${DOMAIN}/api/${API_VERSION}/graphql.json`, {
     method: 'POST',

@@ -1,10 +1,32 @@
+import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import demo from '../data/demo/orders.json'
 import { formatPrice, getProductById, shortTitle } from '../lib/catalog'
+import { accountUrl, shopifyEnabled } from '../lib/shopify'
 
 const dateFmt = new Intl.DateTimeFormat('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
 
 export default function Account() {
+  return shopifyEnabled ? <ShopifyAccount /> : <DemoAccount />
+}
+
+// Sign-in, order history and addresses are handled by Shopify's customer accounts.
+function ShopifyAccount() {
+  useEffect(() => {
+    window.location.replace(accountUrl)
+  }, [])
+
+  return (
+    <div className="page container checkout-empty">
+      <h1>Opening your account…</h1>
+      <p>
+        If nothing happens, <a href={accountUrl}>continue to sign in</a>.
+      </p>
+    </div>
+  )
+}
+
+function DemoAccount() {
   const orders = demo.orders.map((o) => {
     const lines = o.lines.map((l) => {
       const product = getProductById(l.productId)
