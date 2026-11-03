@@ -12,7 +12,7 @@ import Learn from './pages/Learn'
 import Contact from './pages/Contact'
 import Policy from './pages/Policy'
 import Checkout from './pages/Checkout'
-import Account from './pages/Account'
+import Account, { AccountCallback } from './pages/Account'
 import NotFound from './pages/NotFound'
 import { ScrollTrigger } from './lib/motion'
 
@@ -55,6 +55,7 @@ export default function App() {
           <Route path="/policies/:key" element={<Policy />} />
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/account" element={<Account />} />
+          <Route path="/account/callback" element={<AccountCallback />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>

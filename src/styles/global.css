@@ -387,6 +387,13 @@ p { margin: 0 0 1em; }
 
 .account { padding-bottom: var(--space); }
 .account h1 { font-size: clamp(1.8rem, 3vw, 2.4rem); margin-bottom: 24px; }
+.account__head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 24px; }
+.account__head h1 { margin-bottom: 4px; }
+.account__meta { color: var(--muted); }
+.account__address { background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; margin-bottom: 32px; }
+.account__address h2, .account__orders-title { font-size: 1.2rem; margin-bottom: 10px; }
+.account__address address { font-style: normal; color: var(--muted); }
+.order > p { margin-bottom: 16px; color: var(--muted); }
 .orders { list-style: none; padding: 0; margin: 0; display: grid; gap: 18px; }
 .order { background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; }
 .order__head { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 12px; }
