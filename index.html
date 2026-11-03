@@ -10,9 +10,18 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300;1,9..144,400&family=Manrope:wght@400;500;600;700;800&family=Marcellus&display=swap" rel="stylesheet" />
+    <!-- Loader styles live here so they apply before the app bundle loads. -->
+    <style>
+      .hk-loader { position: fixed; inset: 0; z-index: 9999; display: grid; place-items: center; background: #f5f0e6; }
+      .hk-loader img { width: min(420px, 72vw); height: auto; animation: hk-loader-pulse 1.6s ease-in-out infinite; }
+      @keyframes hk-loader-pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.55; transform: scale(0.97); } }
+      @media (prefers-reduced-motion: reduce) { .hk-loader img { animation: none; } }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <div class="hk-loader" role="status" aria-label="Loading"><img src="/assets/logo.png" alt="The Hakiman" /></div>
+    </div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

@@ -4,6 +4,7 @@ import { brand } from '../data/brand'
 import { useCart } from '../lib/cart'
 import Icon from './Icon'
 import SearchOverlay from './SearchOverlay'
+import AccountLink from './AccountLink'
 
 const NAV = [
   { to: '/shop', label: 'Shop' },
@@ -73,9 +74,9 @@ export default function Header() {
             <button className="icon-btn" onClick={() => setSearchOpen(true)} aria-label="Search products">
               <Icon name="search" />
             </button>
-            <Link to="/account" className="icon-btn hide-sm" aria-label="Account">
+            <AccountLink className="icon-btn hide-sm" aria-label="Account">
               <Icon name="user" />
-            </Link>
+            </AccountLink>
             <button className="icon-btn cart-btn" onClick={() => setOpen(true)} aria-label={`Open cart, ${count} items`}>
               <Icon name="bag" />
               <span className={`cart-btn__count ${bump ? 'is-bump' : ''}`} aria-hidden="true">
@@ -102,10 +103,10 @@ export default function Header() {
               <Icon name="arrow" size={18} />
             </NavLink>
           ))}
-          <NavLink to="/account">
+          <AccountLink>
             Account
             <Icon name="arrow" size={18} />
-          </NavLink>
+          </AccountLink>
         </nav>
         <div className="mobile-nav__contact">
           <a href={brand.contact.phoneHref}>{brand.contact.phone}</a>

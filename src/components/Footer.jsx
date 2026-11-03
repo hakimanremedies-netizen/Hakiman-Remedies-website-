@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { brand } from '../data/brand'
 import { getCategories, isLive } from '../lib/catalog'
 import Icon from './Icon'
+import AccountLink from './AccountLink'
 
 export default function Footer() {
   const c = brand.contact
@@ -27,7 +28,7 @@ export default function Footer() {
           <Link to="/ingredients">Explore Ingredients</Link>
           <Link to="/learn">Learn</Link>
           <Link to="/contact">Contact Us</Link>
-          <Link to="/account">My Account</Link>
+          <AccountLink>My Account</AccountLink>
         </nav>
 
         <nav aria-label="Support">

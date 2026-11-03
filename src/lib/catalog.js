@@ -91,7 +91,7 @@ export function getProducts() {
 }
 
 export function getProduct(handle) {
-  return catalog.find((p) => p.handle === handle) || null
+  return catalog.find((p) => sameHandle(p.handle, handle)) || null
 }
 
 export function getProductById(id) {

@@ -7,6 +7,7 @@ import { useCart } from '../lib/cart'
 import { sx } from '../lib/sx'
 import Icon from './Icon'
 import SearchOverlay from './SearchOverlay'
+import AccountLink from './AccountLink'
 
 // Announcement bar, header and footer from the product-page design. Product pages
 // render these instead of the site-wide Header/Footer (see App.jsx).
@@ -96,7 +97,7 @@ export function PdpHeader({ m, announce }) {
           </div>
           <div style={sx('display: flex; align-items: center; gap: 6px')}>
             <button aria-label="Search" onClick={() => setSearchOpen(true)} style={sx(iconBtn)}><SearchIcon /></button>
-            <Link to="/account" aria-label="Account" style={sx(iconBtn)}><AccountIcon /></Link>
+            <AccountLink aria-label="Account" style={sx(iconBtn)}><AccountIcon /></AccountLink>
             <button aria-label={`Cart, ${count} items`} onClick={() => setOpen(true)} style={sx(iconBtn)}><CartIcon /></button>
           </div>
         </div>
@@ -140,10 +141,10 @@ function MobileMenu() {
                 <Icon name="arrow" size={18} />
               </NavLink>
             ))}
-            <NavLink to="/account">
+            <AccountLink>
               Account
               <Icon name="arrow" size={18} />
-            </NavLink>
+            </AccountLink>
           </nav>
           <div className="mobile-nav__contact">
             <a href={brand.contact.phoneHref}>{brand.contact.phone}</a>
