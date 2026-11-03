@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { brand } from '../data/brand'
-import { getCategories } from '../lib/catalog'
+import { getCategories, isLive } from '../lib/catalog'
 import Icon from './Icon'
 
 export default function Footer() {
@@ -48,7 +48,7 @@ export default function Footer() {
       </div>
       <div className="container footer__base">
         <span>© 2026 The Hakiman. All rights reserved.</span>
-        <span>Prototype storefront · demo cart &amp; checkout</span>
+        {!isLive() && <span>Prototype storefront · demo cart &amp; checkout</span>}
       </div>
     </footer>
   )

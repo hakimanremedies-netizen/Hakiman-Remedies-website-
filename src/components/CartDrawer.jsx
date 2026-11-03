@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useCart } from '../lib/cart'
-import { formatPrice, shortTitle } from '../lib/catalog'
+import { formatPrice, isLive, shortTitle } from '../lib/catalog'
 import Icon from './Icon'
 import QtyStepper from './QtyStepper'
 
@@ -79,7 +79,7 @@ export default function CartDrawer() {
                         Remove
                       </button>
                     </div>
-                    {i.qty >= i.stock && <p className="cart-line__note">Maximum demo stock reached</p>}
+                    {i.qty >= i.stock && <p className="cart-line__note">{isLive() ? 'Maximum quantity reached' : 'Maximum demo stock reached'}</p>}
                   </div>
                   <div className="cart-line__total">{formatPrice(i.lineTotal)}</div>
                 </li>

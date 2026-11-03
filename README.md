@@ -51,5 +51,12 @@ Everything comes from **https://thehakiman.com/** (a custom PHP site, not Shopif
 - Checkout collects no payment details and never claims an order was placed. “Continue to secure checkout” stays disabled until Shopify is connected.
 - “Send order on WhatsApp” and the Contact form open WhatsApp with a prefilled message to the **real** Hakiman number. Nothing is sent until the user presses send.
 
-## Needs Shopify to go live
-Replace the functions in `src/lib/catalog.js` with Storefront API queries. Replace the cart in `src/lib/cart.jsx` with the Storefront Cart API, point Buy Now and Checkout at `cart.checkoutUrl`, and move customer accounts to Shopify. Store highlights, ingredients and journal entries as metafields or metaobjects.
+## Shopify
+The site runs on the JSON snapshot until `.env.local` has the Shopify keys (see `.env.example`). Then:
+
+- `src/lib/shopify.js` loads products from the Storefront API before the first render. Price, variants and availability come from Shopify. Editorial content (highlights, features, ingredients, design images) still comes from `products.json`, matched by handle.
+- The cart stays local. "Continue to secure checkout" creates a Shopify cart and redirects to its hosted `checkoutUrl`.
+- `npm run shopify:import` creates or updates the 8 products in Shopify via the Admin API (`-- --dry-run` to preview). Inventory is set to untracked; enter real stock in Shopify admin.
+- On Vercel, add `VITE_SHOPIFY_STORE_DOMAIN` and `VITE_SHOPIFY_STOREFRONT_TOKEN` as environment variables. Never add the Admin keys there.
+
+Still to do: customer accounts (`/account` is demo), and moving editorial content to metafields.

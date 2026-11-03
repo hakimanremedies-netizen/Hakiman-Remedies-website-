@@ -1,12 +1,82 @@
-// Catalog data layer. The UI only talks to these functions, so the local JSON
-// snapshot can later be swapped for Shopify Storefront API calls without touching components.
+// Catalog data layer. The UI only talks to these functions. With Shopify configured,
+// loadCatalog() pulls live products before the first render; otherwise the local
+// JSON snapshot and demo stock are used.
 import products from '../data/products.json'
 import inventory from '../data/demo/inventory.json'
+import { fetchShopifyProducts, shopifyEnabled } from './shopify'
 
 // Display order follows the source homepage "Our Complete Range" grid.
 const SOURCE_ORDER = ['hk-24', 'hk-23', 'hk-22', 'hk-21', 'hk-13', 'hk-12', 'hk-11', 'hk-10']
 
-const catalog = [...products].sort((a, b) => SOURCE_ORDER.indexOf(a.id) - SOURCE_ORDER.indexOf(b.id))
+const sortBySource = (list) => [...list].sort((a, b) => SOURCE_ORDER.indexOf(a.id) - SOURCE_ORDER.indexOf(b.id))
+
+let catalog = sortBySource(products)
+let live = false
+
+// Shopify enforces real stock at checkout; this only caps the quantity stepper.
+const LIVE_MAX_QTY = 10
+
+const money = (m) => (m ? Number(m.amount) : null)
+
+// Shopify trims leading/trailing dashes from handles (PASHOYA's ends in "-g-").
+const sameHandle = (a, b) => a.replace(/^-+|-+$/g, '') === b.replace(/^-+|-+$/g, '')
+
+// Live price, variants and availability come from Shopify. Editorial content
+// (highlights, features, ingredients, design images) stays in products.json,
+// matched by handle, until it is moved to metafields.
+function fromShopify(sp) {
+  const local = products.find((p) => sameHandle(p.handle, sp.handle))
+  const variants = sp.variants.nodes.map((v) => ({
+    id: v.id,
+    title: v.title,
+    price: money(v.price),
+    compareAtPrice: money(v.compareAtPrice),
+    sku: v.sku,
+    available: v.availableForSale,
+  }))
+  const base = local || {
+    id: sp.id,
+    handle: sp.handle,
+    description: sp.description.split(/\n\s*\n/).filter(Boolean),
+    keyBenefits: null,
+    features: [],
+    highlights: [],
+    category: sp.productType,
+    badge: null,
+    brand: sp.vendor,
+    ingredients: null,
+    usageInstructions: null,
+    precautions: null,
+    faqs: [],
+    reviews: [],
+    isDemo: false,
+  }
+  return {
+    ...base,
+    shopifyId: sp.id,
+    title: sp.title,
+    price: variants[0].price,
+    compareAtPrice: variants[0].compareAtPrice,
+    currency: sp.variants.nodes[0].price.currencyCode,
+    images: local ? local.images : sp.images.nodes.map((i) => i.url),
+    sku: variants[0].sku,
+    variants,
+    availability: sp.availableForSale ? 'in_stock' : 'out_of_stock',
+  }
+}
+
+export async function loadCatalog() {
+  if (!shopifyEnabled) return
+  try {
+    const remote = await fetchShopifyProducts()
+    catalog = sortBySource(remote.map(fromShopify))
+    live = true
+  } catch (err) {
+    console.error('Shopify catalog failed to load; using the local snapshot.', err)
+  }
+}
+
+export const isLive = () => live
 
 // Category descriptors describe the product format only — no health claims.
 export const CATEGORY_INFO = {
@@ -52,8 +122,9 @@ export function searchProducts(query) {
   )
 }
 
-// Demo-only stock, kept apart from the real catalog fields.
-export function getDemoStock(id) {
+// Live: Shopify availability. Otherwise demo-only stock, kept apart from the real catalog fields.
+export function getStock(id) {
+  if (live) return getProductById(id)?.availability === 'in_stock' ? LIVE_MAX_QTY : 0
   return inventory.stock[id] ?? 0
 }
 

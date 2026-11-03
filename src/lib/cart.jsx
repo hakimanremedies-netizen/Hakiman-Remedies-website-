@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useReducer, useState } from 'react'
-import { getDemoStock, getProductById } from './catalog'
+import { getProductById, getStock, isLive } from './catalog'
+import { createCheckoutUrl } from './shopify'
 
 const STORAGE_KEY = 'hakiman-demo-cart-v1'
 const CartContext = createContext(null)
@@ -7,13 +8,16 @@ const CartContext = createContext(null)
 function load() {
   try {
     const raw = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]')
-    return Array.isArray(raw) ? raw.filter((l) => getProductById(l.productId)) : []
+    // Drops lines whose variant no longer exists, e.g. demo ids after switching to Shopify.
+    return Array.isArray(raw)
+      ? raw.filter((l) => getProductById(l.productId)?.variants.some((v) => v.id === l.variantId))
+      : []
   } catch {
     return []
   }
 }
 
-const clampQty = (productId, qty) => Math.max(0, Math.min(qty, getDemoStock(productId)))
+const clampQty = (productId, qty) => Math.max(0, Math.min(qty, getStock(productId)))
 
 function reducer(lines, action) {
   switch (action.type) {
@@ -61,7 +65,7 @@ export function CartProvider({ children }) {
     const items = lines.map((l) => {
       const product = getProductById(l.productId)
       const variant = product.variants.find((v) => v.id === l.variantId) || product.variants[0]
-      return { ...l, product, variant, lineTotal: variant.price * l.qty, stock: getDemoStock(l.productId) }
+      return { ...l, product, variant, lineTotal: variant.price * l.qty, stock: getStock(l.productId) }
     })
     return {
       items,
@@ -74,6 +78,12 @@ export function CartProvider({ children }) {
       setQty: (variantId, qty) => dispatch({ type: 'set', variantId, qty }),
       remove: (variantId) => dispatch({ type: 'remove', variantId }),
       clear: () => dispatch({ type: 'clear' }),
+      // Null until Shopify is connected; the checkout page shows the demo notice instead.
+      checkout: isLive()
+        ? async () => {
+            window.location.assign(await createCheckoutUrl(lines))
+          }
+        : null,
     }
   }, [lines, open, add])
 

@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { brand } from '../data/brand'
 import { useCart } from '../lib/cart'
@@ -5,11 +6,25 @@ import { formatPrice, shortTitle } from '../lib/catalog'
 import QtyStepper from '../components/QtyStepper'
 import Icon from '../components/Icon'
 
-// Prototype checkout. It never collects payment details and never claims an order was placed.
-// In production this route is replaced by Shopify's hosted checkout (cart.checkoutUrl).
+// Order review. With Shopify connected, the button hands off to Shopify's hosted
+// checkout; without it this page is a demo that never collects payment details.
 export default function Checkout() {
-  const { items, subtotal, mrpTotal, setQty, remove, count } = useCart()
+  const { items, subtotal, mrpTotal, setQty, remove, count, checkout } = useCart()
+  const [redirecting, setRedirecting] = useState(false)
+  const [error, setError] = useState(null)
   const c = brand.contact
+
+  const goToCheckout = async () => {
+    setRedirecting(true)
+    setError(null)
+    try {
+      await checkout()
+    } catch (err) {
+      console.error(err)
+      setError('Could not start checkout. Please try again, or send your order on WhatsApp.')
+      setRedirecting(false)
+    }
+  }
 
   const whatsappText = [
     'Hello Hakiman Remedies, I would like to order:',
@@ -29,9 +44,11 @@ export default function Checkout() {
 
   return (
     <div className="page container checkout">
-      <div className="demo-banner" role="note">
-        <strong>Demo checkout.</strong> This prototype is not connected to a payment provider. No payment details are collected and no order is placed here.
-      </div>
+      {!checkout && (
+        <div className="demo-banner" role="note">
+          <strong>Demo checkout.</strong> This prototype is not connected to a payment provider. No payment details are collected and no order is placed here.
+        </div>
+      )}
 
       <div className="checkout__grid">
         <section className="checkout__summary" aria-labelledby="sum-title">
@@ -66,11 +83,23 @@ export default function Checkout() {
           <h2>How to complete this order</h2>
           <div className="checkout__option">
             <h3>Secure online checkout</h3>
-            <p>Once the store is connected to Shopify, this button sends you straight to the hosted checkout for contact details, shipping address and payment.</p>
-            <button className="btn btn--primary btn--block" disabled aria-describedby="shopify-note">
-              Continue to secure checkout
-            </button>
-            <p id="shopify-note" className="fine">Not available in this prototype — requires Shopify connection.</p>
+            {checkout ? (
+              <>
+                <p>Continue to our secure Shopify checkout for contact details, shipping address and payment.</p>
+                <button className="btn btn--primary btn--block" onClick={goToCheckout} disabled={redirecting}>
+                  {redirecting ? 'Opening checkout…' : 'Continue to secure checkout'}
+                </button>
+                {error && <p className="fine" role="alert">{error}</p>}
+              </>
+            ) : (
+              <>
+                <p>Once the store is connected to Shopify, this button sends you straight to the hosted checkout for contact details, shipping address and payment.</p>
+                <button className="btn btn--primary btn--block" disabled aria-describedby="shopify-note">
+                  Continue to secure checkout
+                </button>
+                <p id="shopify-note" className="fine">Not available in this prototype — requires Shopify connection.</p>
+              </>
+            )}
           </div>
           <div className="checkout__option">
             <h3>Order by WhatsApp</h3>
