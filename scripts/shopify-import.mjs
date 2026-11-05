@@ -3,6 +3,7 @@
 //
 //   npm run shopify:import              # import everything
 //   npm run shopify:import -- --dry-run # print what would be sent, no API calls
+//   npm run shopify:import -- --only hk-11  # just one product (by id)
 //
 // Needs in .env.local: VITE_SHOPIFY_STORE_DOMAIN, plus SHOPIFY_ADMIN_TOKEN or
 // SHOPIFY_CLIENT_ID + SHOPIFY_CLIENT_SECRET. Admin scopes: write_products,
@@ -13,6 +14,7 @@ import path from 'node:path'
 const API_VERSION = '2026-07'
 const ROOT = path.resolve(import.meta.dirname, '..')
 const DRY_RUN = process.argv.includes('--dry-run')
+const ONLY = process.argv.includes('--only') ? process.argv[process.argv.indexOf('--only') + 1] : null
 const DOMAIN = process.env.VITE_SHOPIFY_STORE_DOMAIN
 
 const MIME = { '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp' }
@@ -21,7 +23,7 @@ const MIME = { '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg',
 async function fetchRetry(url, opts, tries = 4) {
   for (let i = 1; ; i++) {
     try {
-      return await fetchRetry(url, opts)
+      return await fetch(url, opts)
     } catch (err) {
       if (i >= tries) throw err
       console.warn(`  network error, retrying (${i}/${tries - 1})…`)
@@ -99,7 +101,10 @@ async function stageImage(publicPath) {
 const shopifyHandle = (h) => h.replace(/^-+|-+$/g, '')
 
 async function productInput(p) {
-  const v = p.variants[0]
+  // Several variants become a "Pack" option (e.g. PASHOYA 1/2/3 jars); one variant uses Shopify's default option.
+  const multi = p.variants.length > 1
+  const option = multi ? 'Pack' : 'Title'
+  const valueOf = (v) => (multi ? v.title : 'Default Title')
   return {
     handle: shopifyHandle(p.handle),
     title: p.title,
@@ -107,16 +112,14 @@ async function productInput(p) {
     productType: p.category,
     vendor: p.brand,
     status: 'ACTIVE',
-    productOptions: [{ name: 'Title', values: [{ name: 'Default Title' }] }],
-    variants: [
-      {
-        optionValues: [{ optionName: 'Title', name: 'Default Title' }],
-        price: String(v.price),
-        compareAtPrice: v.compareAtPrice ? String(v.compareAtPrice) : null,
-        // Stock is not tracked until real inventory is entered in Shopify admin.
-        inventoryItem: { sku: v.sku, tracked: false },
-      },
-    ],
+    productOptions: [{ name: option, values: p.variants.map((v) => ({ name: valueOf(v) })) }],
+    variants: p.variants.map((v) => ({
+      optionValues: [{ optionName: option, name: valueOf(v) }],
+      price: String(v.price),
+      compareAtPrice: v.compareAtPrice ? String(v.compareAtPrice) : null,
+      // Stock is not tracked until real inventory is entered in Shopify admin.
+      inventoryItem: { sku: v.sku, tracked: false },
+    })),
     files: DRY_RUN
       ? p.images.map((src) => ({ originalSource: src, contentType: 'IMAGE', alt: p.title }))
       : await Promise.all(
@@ -126,7 +129,9 @@ async function productInput(p) {
 }
 
 async function main() {
-  const products = JSON.parse(await readFile(path.join(ROOT, 'src/data/products.json'), 'utf8'))
+  const products = JSON.parse(await readFile(path.join(ROOT, 'src/data/products.json'), 'utf8')).filter(
+    (p) => !ONLY || p.id === ONLY,
+  )
 
   if (DRY_RUN) {
     for (const p of products) console.log(JSON.stringify(await productInput(p), null, 2))

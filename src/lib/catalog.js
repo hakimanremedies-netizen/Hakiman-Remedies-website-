@@ -133,6 +133,9 @@ export function shortTitle(p) {
   return p.title.split(' – ')[0]
 }
 
+// Pack name (e.g. "2 Jars") for products with options; null for single-variant products.
+export const variantLabel = (p, v) => (p.variants.length > 1 ? v.title : null)
+
 export function summary(p) {
   return p.description[0]?.split('. ')[0].replace(/\.$/, '') + '.'
 }

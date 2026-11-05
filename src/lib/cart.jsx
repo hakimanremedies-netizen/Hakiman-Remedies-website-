@@ -55,8 +55,8 @@ export function CartProvider({ children }) {
     }
   }, [lines])
 
-  const add = useCallback((product, qty = 1, { openDrawer = true } = {}) => {
-    const variant = product.variants[0]
+  const add = useCallback((product, qty = 1, { openDrawer = true, variantId } = {}) => {
+    const variant = product.variants.find((v) => v.id === variantId) || product.variants[0]
     dispatch({ type: 'add', productId: product.id, variantId: variant.id, qty })
     if (openDrawer) setOpen(true)
   }, [])

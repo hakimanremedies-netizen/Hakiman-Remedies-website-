@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useCart } from '../lib/cart'
-import { formatPrice, shortTitle } from '../lib/catalog'
+import { formatPrice, shortTitle, variantLabel } from '../lib/catalog'
 import QtyStepper from '../components/QtyStepper'
 import Icon from '../components/Icon'
 
@@ -58,6 +58,7 @@ export default function Checkout() {
                 </Link>
                 <div className="cart-line__body">
                   <Link to={`/products/${i.product.handle}`} className="cart-line__title">{shortTitle(i.product)}</Link>
+                  {variantLabel(i.product, i.variant) && <div className="cart-line__variant">{variantLabel(i.product, i.variant)}</div>}
                   <div className="cart-line__unit">
                     {formatPrice(i.variant.price)}
                     {i.variant.compareAtPrice > i.variant.price && <s>{formatPrice(i.variant.compareAtPrice)}</s>}

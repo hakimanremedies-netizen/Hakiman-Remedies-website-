@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useCart } from '../lib/cart'
-import { formatPrice, isLive, shortTitle } from '../lib/catalog'
+import { formatPrice, isLive, shortTitle, variantLabel } from '../lib/catalog'
 import Icon from './Icon'
 import QtyStepper from './QtyStepper'
 
@@ -63,6 +63,7 @@ export default function CartDrawer() {
                     <Link to={`/products/${i.product.handle}`} onClick={() => setOpen(false)} className="cart-line__title">
                       {shortTitle(i.product)}
                     </Link>
+                    {variantLabel(i.product, i.variant) && <div className="cart-line__variant">{variantLabel(i.product, i.variant)}</div>}
                     <div className="cart-line__unit">
                       {formatPrice(i.variant.price)}
                       {i.variant.compareAtPrice && <s>{formatPrice(i.variant.compareAtPrice)}</s>}

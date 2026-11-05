@@ -30,9 +30,29 @@ function buildPage(product) {
   }
 
   if (product.id === PASHOYA_ID) {
+    // Packs are the product's Shopify variants; only their descriptions and tags live in pdp.js.
+    const packs = product.variants.length > 1
+      ? product.variants.map((v) => {
+          const copy = pashoya.packCopy[v.title] || {}
+          return {
+            id: v.id,
+            title: v.title,
+            unitPrice: v.price,
+            price: formatPrice(v.price),
+            mrp: v.compareAtPrice > v.price ? formatPrice(v.compareAtPrice) : null,
+            sub: copy.sub ?? '',
+            subMobile: copy.subMobile ?? '',
+            tag: copy.tag ?? '',
+            tagMobile: copy.tagMobile ?? '',
+          }
+        })
+      : null
     return {
       ...pashoya,
       ...base,
+      announce: pashoya.announce.map((a) => a ?? (d ? `${d.percent}% off launch price — today ${price}` : `Today ${price}`)),
+      packs,
+      defaultPack: packs ? (packs.find((p) => p.title === pashoya.defaultPack) || packs[0]).id : null,
       featured: true,
       badge: 'Bestseller',
       crumbTo: '/shop?category=Powder',
@@ -895,19 +915,17 @@ function ProductPage({ product }) {
   }, [page.name])
 
   const sel = page.packs?.find((p) => p.id === pack) || null
-  // Pack prices come from the design (some are still placeholders); the cart
-  // itself always charges the catalog price per jar.
-  const selPrice = sel ? sel.price : formatPrice(product.price * qty)
-  const units = (sel ? sel.jars : 1) * qty
+  // The mobile design has no quantity stepper, so a mobile buy is one pack.
+  const buyQty = m ? 1 : qty
+  const selPrice = formatPrice((sel ? sel.unitPrice : product.price) * buyQty)
 
   const addToCart = () => {
-    add(product, units)
+    add(product, qty, { variantId: sel?.id })
     setAdded(true)
     setTimeout(() => setAdded(false), 1400)
   }
   const buyNow = () => {
-    // The mobile design has no quantity stepper, so a mobile buy is one pack.
-    add(product, sel ? sel.jars * (m ? 1 : qty) : m ? 1 : qty, { openDrawer: false })
+    add(product, buyQty, { openDrawer: false, variantId: sel?.id })
     navigate('/checkout')
   }
   const buy = { pack, setPack, qty, setQty, selPrice: m && !sel ? page.price : selPrice, addToCart, buyNow, added }

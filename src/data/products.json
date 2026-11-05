@@ -545,11 +545,25 @@
     "brand": "The Hakiman",
     "variants": [
       {
-        "id": "hk-11-default",
-        "title": "Default",
+        "id": "hk-11-1-jar",
+        "title": "1 Jar",
         "price": 522.0,
         "compareAtPrice": 695.0,
         "sku": "02"
+      },
+      {
+        "id": "hk-11-2-jars",
+        "title": "2 Jars",
+        "price": 1182.0,
+        "compareAtPrice": 1390.0,
+        "sku": "02-2"
+      },
+      {
+        "id": "hk-11-3-jars",
+        "title": "3 Jars",
+        "price": 1564.0,
+        "compareAtPrice": 2085.0,
+        "sku": "02-3"
       }
     ],
     "ingredients": "Epsom Salt, Sajji Khar, Bhind Salt, Java Khar and Essential Oils including Eucalyptus Oil, Mint Oil, Lavender Oil, Bergamot Oil, Orange Oil and Lemongrass Oil.",

@@ -11,7 +11,8 @@ export const pashoya = {
   name: 'PASHOYA Pain Salt',
   crumb: 'Body care',
   eyebrow: 'Unani mineral soak · Hakiman, Lucknow',
-  announce: ['Ships in 2–3 days · Delivered across India', '25% off launch price — today ₹522', 'Lab tested · 100% natural minerals'],
+  // The middle announcement (discount and price) is built from the live Shopify price in Product.jsx.
+  announce: ['Ships in 2–3 days · Delivered across India', null, 'Lab tested · 100% natural minerals'],
   rating: '[Rating] · [N] verified reviews',
   ratingMobile: '[Rating] · [N] reviews',
   lead: 'Soothe aching feet and stiff joints in one 20-minute warm soak — with four traditional mineral salts and six essential oils.',
@@ -38,12 +39,14 @@ export const pashoya = {
     { src: `${PDP}/essential-oils.webp`, alt: 'Essential oil bottles', fit: 'cover', pad: '0px', chip: 'Eucalyptus, mint, lavender, bergamot, orange, lemongrass', label: 'Show the essential oils' },
     { src: `${PDP}/pashoya-key-ingredients.webp`, alt: 'PASHOYA key ingredients: Epsom salt, Sajji khar, Bhind salt and Java khar', fit: 'cover', pad: '0px', chip: 'Lab tested · no colours · no synthetic fragrance', label: 'Show the mineral salts' },
   ],
-  packs: [
-    { id: 1, jars: 1, title: '1 Jar', sub: 'Try the evening ritual', subMobile: '', price: '₹522', mrp: '₹695', tag: '', tagMobile: '' },
-    { id: 2, jars: 2, title: '2 Jars', sub: 'One for you, one for your parents', subMobile: 'One for you, one for your parents', price: '₹[PRICE]', mrp: '₹1,390', tag: 'Most popular', tagMobile: 'Most popular' },
-    { id: 3, jars: 3, title: '3 Jars', sub: 'Family pack + free wooden measuring scoop', subMobile: '+ free measuring scoop', price: '₹[PRICE]', mrp: '₹2,085', tag: 'Best value', tagMobile: '' },
-  ],
-  defaultPack: 2,
+  // Copy for each pack, keyed by the Shopify variant ("Pack" option) title.
+  // Pack names, prices and MRPs come from Shopify.
+  packCopy: {
+    '1 Jar': { sub: 'Try the evening ritual', subMobile: '', tag: '', tagMobile: '' },
+    '2 Jars': { sub: 'One for you, one for your parents', subMobile: 'One for you, one for your parents', tag: 'Most popular', tagMobile: 'Most popular' },
+    '3 Jars': { sub: 'Family pack + free wooden measuring scoop', subMobile: '+ free measuring scoop', tag: 'Best value', tagMobile: '' },
+  },
+  defaultPack: '2 Jars',
   trust: ['Lab tested', 'Secure checkout', '[Cash on delivery]'],
   trustMobile: ['Lab tested', 'Ships in 2–3 days', '[COD]'],
   accordions: [
