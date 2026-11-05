@@ -8,7 +8,7 @@ export const brand = {
   emblem: '/assets/fab.png',
   sourceUrl: 'https://thehakiman.com/',
   tagline:
-    'Premium Ayurvedic & Unani remedies and holistic wellness solutions crafted with generations of healing wisdom since 1953.',
+    'Premium Ayurvedic & Unani remedies and holistic wellness solutions crafted with generations of healing wisdom since 1943.',
   contact: {
     phone: '+91 8881116681',
     phoneHref: 'tel:+918881116681',
@@ -22,11 +22,11 @@ export const brand = {
 
 // about.php
 export const story = {
-  eyebrow: 'Since 1953',
+  eyebrow: 'Since 1943',
   title: 'A Legacy of Herbal Healing',
   lede: 'Passed through generations—blending authentic Unani and Ayurvedic herbal wisdom with modern standards of care and transparency.',
   paragraphs: [
-    'Established in 1953, Hakiman Remedies has operated on a simple, enduring principle: treating every patron like family. What began as a humble herbal practice has grown into a trusted sanctuary for those seeking natural, holistic wellness solutions.',
+    'Established in 1943, Hakiman Remedies has operated on a simple, enduring principle: treating every patron like family. What began as a humble herbal practice has grown into a trusted sanctuary for those seeking natural, holistic wellness solutions.',
     'For decades, our Hakims have preserved ancient formulations and healing traditions passed down through generations. Whether you are seeking relief from a specific ailment or looking to maintain your natural everyday balance, our remedies are crafted to restore harmony without compromising on purity or authenticity.',
   ],
   quote: 'Every remedy we craft carries generations of healing wisdom, and every inquiry is treated with personal attention and care.',
