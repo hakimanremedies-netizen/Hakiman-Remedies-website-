@@ -57,7 +57,7 @@ function buildPage(product) {
       badge: 'Bestseller',
       crumbTo: '/shop?category=Powder',
       sizeNote: `${pashoya.size} · Inclusive of all taxes`,
-      trust: [{ icon: 'lab', label: pashoya.trust[0] }, { icon: 'shield', label: pashoya.trust[1] }, { icon: 'truck', label: pashoya.trust[2] }],
+      trust: pashoya.trust.map((label, i) => ({ icon: ['lab', 'shield', 'truck'][i], label })),
       accordions: [...pashoya.accordions, shippingAccordion],
       highlights: [],
       crossSell: pashoya.crossSell.map(getProductById).filter(Boolean),
@@ -92,8 +92,8 @@ function buildPage(product) {
       label: `Show image ${i + 1}`,
     })),
     packs: null,
-    trust: [{ icon: 'truck', label: 'Ships in 2–3 days' }, { icon: 'shield', label: 'Secure checkout' }, { icon: 'cash', label: '[Cash on delivery]' }],
-    trustMobile: ['Ships in 2–3 days', 'Secure checkout', '[COD]'],
+    trust: [{ icon: 'truck', label: 'Ships in 2–3 days' }, { icon: 'shield', label: 'Secure checkout' }],
+    trustMobile: ['Ships in 2–3 days', 'Secure checkout'],
     accordions: [
       { title: 'Description', body: product.description },
       { title: 'Key features', list: product.features },
@@ -321,7 +321,7 @@ function DesktopTop({ page, buy }) {
 
         <Delivery />
 
-        <div style={sx('display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px')}>
+        <div style={sx(`display: grid; grid-template-columns: repeat(${page.trust.length}, minmax(0, 1fr)); gap: 10px`)}>
           {page.trust.map((t) => (
             <div key={t.label} style={sx('display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; font-size: 13px; font-weight: 600; padding: 12px 6px; border-radius: 12px; background: #F7E9D9')}>
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#8A3A0C" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{TRUST_PATHS[t.icon]}</svg>{t.label}
@@ -416,7 +416,7 @@ function MobileTop({ page, buy }) {
         <button data-hk-cta onClick={buyNow} style={sx(`height: 56px; border-radius: 14px; border: 0; background: ${CTA}; color: #FFFFFF; font-family: inherit; font-size: 17px; font-weight: 800; cursor: pointer`)}>Buy now · {selPrice}</button>
         <a href={askHref(page.name)} target="_blank" rel="noreferrer" style={sx('display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 46px; border-radius: 12px; background: #E6F3EA; color: #1E5B36; font-size: 14px; font-weight: 700; text-decoration: none')}>Ask our Hakim on WhatsApp</a>
 
-        <div style={sx('display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; font-size: 12px; font-weight: 700; text-align: center')}>
+        <div style={sx(`display: grid; grid-template-columns: repeat(${page.trustMobile.length}, minmax(0, 1fr)); gap: 8px; font-size: 12px; font-weight: 700; text-align: center`)}>
           {page.trustMobile.map((t) => <div key={t} style={sx('background: #F7E9D9; border-radius: 10px; padding: 10px 4px')}>{t}</div>)}
         </div>
       </div>
@@ -572,6 +572,7 @@ function WhenToUse({ page, buyNow }) {
 }
 
 function Reels({ page, m }) {
+  if (!page.reels.length) return null
   return (
     <section style={sx(`max-width: 1280px; margin: 0 auto; padding: ${m ? '40px 16px 0' : '72px 24px 40px'}; width: 100%; box-sizing: border-box`)}>
       <div style={eyebrowStyle(m)}>Watch the ritual</div>
@@ -607,7 +608,7 @@ function Ingredients({ page, m }) {
               <div style={sx(m ? 'padding: 12px 12px 14px; display: flex; flex-direction: column; gap: 4px' : 'padding: 18px 20px 22px; display: flex; flex-direction: column; gap: 6px')}>
                 <div style={sx(`font-size: ${m ? '10px' : '12px'}; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: #8A3A0C`)}>{x.role}</div>
                 <h3 style={sx(`margin: 0; font-size: ${m ? '16px' : '19px'}; font-weight: 800`)}>{x.name}</h3>
-                <p style={sx(`margin: 0; font-size: ${m ? '13px' : '14px'}; line-height: 1.55; color: #6A5244`)}>{x.body}</p>
+                {x.body && <p style={sx(`margin: 0; font-size: ${m ? '13px' : '14px'}; line-height: 1.55; color: #6A5244`)}>{x.body}</p>}
               </div>
             </article>
           ))}
@@ -696,13 +697,17 @@ function Heritage({ page, m }) {
         <img src="/assets/pdp/logo-stacked.webp" alt="Hakiman logo" loading="lazy" style={sx(`width: ${m ? '96px' : '120px'}; height: auto; display: block`)} />
         <h2 style={h2Style(m, '44px')}>{h.title}</h2>
         <p style={sx(`margin: 0; font-size: ${m ? '15px' : '17px'}; line-height: 1.65; color: #4E3A2E`)}>{h.text}</p>
-        <blockquote style={sx(`margin: 0; padding: ${m ? '16px 18px' : '20px 24px'}; border-radius: 16px; background: #FFFFFF; border: 1px solid #EAD6C0; font-family: 'Marcellus', Georgia, serif; font-size: ${m ? '18px' : '21px'}; line-height: 1.45`)}>{h.quote}<footer style={sx("font-family: 'Manrope', sans-serif; font-size: 14px; color: #6A5244; margin-top: 10px")}>{h.cite}</footer></blockquote>
+        {h.quote && (
+          <blockquote style={sx(`margin: 0; padding: ${m ? '16px 18px' : '20px 24px'}; border-radius: 16px; background: #FFFFFF; border: 1px solid #EAD6C0; font-family: 'Marcellus', Georgia, serif; font-size: ${m ? '18px' : '21px'}; line-height: 1.45`)}>{h.quote}<footer style={sx("font-family: 'Manrope', sans-serif; font-size: 14px; color: #6A5244; margin-top: 10px")}>{h.cite}</footer></blockquote>
+        )}
       </div>
       <div style={sx(`flex: 1 1 420px; min-width: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: ${m ? '10px' : '14px'}`)}>
-        {h.stats.map((s) => {
+        {h.stats.map((s, i) => {
           const [box, small] = STAT_TONES[s.tone]
+          // An odd last stat spans both columns so the grid has no empty cell.
+          const span = i === h.stats.length - 1 && h.stats.length % 2 ? '; grid-column: 1 / -1' : ''
           return (
-            <div key={s.big} style={sx(`${box}; padding: ${m ? '18px' : '26px'}`)}>
+            <div key={s.big} style={sx(`${box}; padding: ${m ? '18px' : '26px'}${span}`)}>
               <div style={sx(`font-family: 'Marcellus', Georgia, serif; font-size: ${m ? '34px' : '44px'}`)}>{s.big}</div>
               <div style={sx(`font-size: ${m ? '13px' : '14px'}; margin-top: 6px; ${small}`)}>{s.text}</div>
             </div>
@@ -723,21 +728,32 @@ function Reviews({ page, m }) {
             <h2 style={h2Style(m, '42px')}>What soakers are saying</h2>
           </div>
           <div style={sx('display: flex; align-items: center; gap: 16px; flex-wrap: wrap')}>
-            <div style={sx(`font-family: 'Marcellus', Georgia, serif; font-size: ${m ? '40px' : '52px'}; line-height: 1`)}>{page.reviewScore}</div>
-            <div><div aria-hidden="true" style={sx('color: #D9822B; letter-spacing: 3px; font-size: 18px')}>★★★★★</div><div style={sx('font-size: 14px; color: #6A5244')}>{page.reviewCount}</div></div>
+            {page.reviewScore && page.reviewCount && (
+              <>
+                <div style={sx(`font-family: 'Marcellus', Georgia, serif; font-size: ${m ? '40px' : '52px'}; line-height: 1`)}>{page.reviewScore}</div>
+                <div><div aria-hidden="true" style={sx('color: #D9822B; letter-spacing: 3px; font-size: 18px')}>★★★★★</div><div style={sx('font-size: 14px; color: #6A5244')}>{page.reviewCount}</div></div>
+              </>
+            )}
             <a href={whatsappHref(`Hi Hakiman, I'd like to share a review of ${page.name}.`)} target="_blank" rel="noreferrer" style={sx('display: inline-flex; align-items: center; height: 48px; box-sizing: border-box; padding: 0 20px; border-radius: 12px; border: 2px solid #2B1A11; background: #FFFFFF; font-weight: 800; font-size: 14px; cursor: pointer; color: #2B1A11; text-decoration: none')}>Write a review</a>
           </div>
         </div>
-        <div style={sx('display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px')}>
-          {page.reviews.map((rv) => (
-            <article key={rv.head} style={sx('background: #FBF5EC; border: 1px solid #EAD6C0; border-radius: 18px; padding: 24px; display: flex; flex-direction: column; gap: 12px')}>
-              <div aria-hidden="true" style={sx('color: #D9822B; letter-spacing: 2px')}>★★★★★</div>
-              <h3 style={sx('margin: 0; font-size: 17px; font-weight: 800; line-height: 1.35')}>{rv.head}</h3>
-              <p style={sx('margin: 0; font-size: 14px; line-height: 1.6; color: #6A5244; flex: 1')}>{rv.body}</p>
-              <div style={sx('display: flex; justify-content: space-between; font-size: 13px; color: #6A5244')}><span style={sx('font-weight: 700; color: #2B1A11')}>{rv.who}</span><span>Verified buyer</span></div>
-            </article>
-          ))}
-        </div>
+        {page.reviews.length === 0 ? (
+          <div style={sx(`border: 1px dashed #E2C8AC; border-radius: 18px; padding: ${m ? '28px 18px' : '40px'}; text-align: center; background: #FBF5EC`)}>
+            <h3 style={sx(`margin: 0 0 8px; font-size: ${m ? '18px' : '20px'}; font-weight: 800`)}>No reviews yet</h3>
+            <p style={sx('margin: 0 auto; max-width: 480px; font-size: 15px; line-height: 1.6; color: #6A5244')}>Tried {page.name}? Tell us how your soak went — your review helps the next family decide.</p>
+          </div>
+        ) : (
+          <div style={sx('display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px')}>
+            {page.reviews.map((rv) => (
+              <article key={rv.head} style={sx('background: #FBF5EC; border: 1px solid #EAD6C0; border-radius: 18px; padding: 24px; display: flex; flex-direction: column; gap: 12px')}>
+                <div aria-hidden="true" style={sx('color: #D9822B; letter-spacing: 2px')}>★★★★★</div>
+                <h3 style={sx('margin: 0; font-size: 17px; font-weight: 800; line-height: 1.35')}>{rv.head}</h3>
+                <p style={sx('margin: 0; font-size: 14px; line-height: 1.6; color: #6A5244; flex: 1')}>{rv.body}</p>
+                <div style={sx('display: flex; justify-content: space-between; font-size: 13px; color: #6A5244')}><span style={sx('font-weight: 700; color: #2B1A11')}>{rv.who}</span><span>Verified buyer</span></div>
+              </article>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   )

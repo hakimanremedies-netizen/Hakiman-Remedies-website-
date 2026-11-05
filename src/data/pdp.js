@@ -1,13 +1,14 @@
 // Product-page content for PASHOYA, copied verbatim from the approved design
 // ("PASHOYA Product Page.html"). Text in [square brackets] is the designer's
-// placeholder for facts the brand still has to supply — keep it until they do.
+// placeholder for facts the brand still has to supply — keep it until they do;
+// publishable() below keeps anything bracketed off the live site.
 // Other products render the same template from their catalog fields only.
 
 const PDP = '/assets/pdp'
 
 export const PASHOYA_ID = 'hk-11'
 
-export const pashoya = {
+const pashoyaDraft = {
   name: 'PASHOYA Pain Salt',
   crumb: 'Body care',
   eyebrow: 'Unani mineral soak · Hakiman, Lucknow',
@@ -166,16 +167,46 @@ export const pashoya = {
   crossSell: ['hk-24', 'hk-22', 'hk-21'],
 }
 
+const isDraft = (s) => typeof s === 'string' && /\[[^\]]+\]/.test(s)
+const keep = (s) => (isDraft(s) ? null : s)
+
+// Drops every line, card or section still holding designer placeholders, so the
+// live page shows only brand-supplied content. Filling a placeholder in brings it back.
+function publishable(p) {
+  const h = p.heritage
+  const quoted = !isDraft(h.quote) && !isDraft(h.cite)
+  return {
+    ...p,
+    rating: keep(p.rating),
+    ratingMobile: keep(p.ratingMobile),
+    trust: p.trust.filter((t) => !isDraft(t)),
+    trustMobile: p.trustMobile.filter((t) => !isDraft(t)),
+    often: p.often.filter((o) => !isDraft(o.text)),
+    // The photos are product shots, not customer reels; show the section only once real captions exist.
+    reels: p.reels.some((r) => isDraft(r.caption)) ? [] : p.reels,
+    minerals: p.minerals.map((x) => ({ ...x, body: keep(x.body) })),
+    heritage: { ...h, quote: quoted ? h.quote : null, cite: quoted ? h.cite : null, stats: h.stats.filter((s) => !isDraft(s.big) && !isDraft(s.text)) },
+    reviewScore: keep(p.reviewScore),
+    reviewCount: keep(p.reviewCount),
+    reviews: p.reviews.filter((r) => ![r.head, r.body, r.who].some(isDraft)),
+    faqs: p.faqs.filter((f) => !isDraft(f.q) && !isDraft(f.a)),
+  }
+}
+
+export const pashoya = publishable(pashoyaDraft)
+
 // Shown on every product page; restated from the published shipping and refund policies.
 export const shippingAccordion = {
   title: 'Shipping & returns',
   body: ['Ships to every state in India. Dispatched in 2–3 business days, delivered in 5–7. Damaged or wrong item? Tell us within 7 days of delivery with a photo and we\'ll refund to your original payment method.'],
 }
 
-export const storeFaqs = [
+const storeFaqsDraft = [
   { q: 'When will my order arrive?', a: 'Orders are dispatched in 2–3 business days and delivered in 5–7 days, anywhere in India.' },
   { q: 'Is cash on delivery available?', a: '[Confirm COD availability and any charges.]' },
   { q: 'What if my order arrives damaged?', a: 'Message us within 7 days of delivery with a photo and we’ll refund to your original payment method within 7–10 business days.' },
 ]
 
 export const PDP_LOGO = `${PDP}/logo-stacked.webp`
+
+export const storeFaqs = storeFaqsDraft.filter((f) => !isDraft(f.a))
