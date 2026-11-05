@@ -1,6 +1,6 @@
 # The Hakiman — storefront redesign (prototype)
 
-Vite + React + GSAP prototype at `http://localhost:4800`.
+Live at https://www.thehakiman.com (Vercel). Local dev at `http://localhost:4800`.
 
 ```
 npm install
