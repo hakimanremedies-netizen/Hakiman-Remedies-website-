@@ -15,6 +15,9 @@ const PATHS = {
   pin: <><path d="M12 21s-6.5-6-6.5-11a6.5 6.5 0 0 1 13 0c0 5-6.5 11-6.5 11Z" /><circle cx="12" cy="10" r="2.3" /></>,
   clock: <><circle cx="12" cy="12" r="8" /><path d="M12 8v4.5l3 1.8" /></>,
   play: <><path d="M8 5.5v13l10.5-6.5Z" /></>,
+  lock: <><rect x="5" y="10.5" width="14" height="9.5" rx="1.8" /><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5" /></>,
+  shield: <><path d="M12 3l7 3v5c0 5-3 8.5-7 10-4-1.5-7-5-7-10V6z" /><path d="M9 12l2 2 4-4" /></>,
+  truck: <><path d="M3 7h11v9H3zM14 10h4l3 3v3h-7" /><circle cx="7" cy="17.5" r="1.8" /><circle cx="17" cy="17.5" r="1.8" /></>,
   trash: <><path d="M5 7h14M10 7V5h4v2M7 7l1 12h8l1-12" /></>,
 }
 
