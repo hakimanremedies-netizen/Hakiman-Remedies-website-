@@ -1,4 +1,4 @@
-import { useLayoutEffect } from 'react'
+import { useEffect, useLayoutEffect } from 'react'
 import { Route, Routes, useLocation } from 'react-router-dom'
 import Header from './components/Header'
 import Footer from './components/Footer'
@@ -15,6 +15,8 @@ import Checkout from './pages/Checkout'
 import Account, { AccountCallback } from './pages/Account'
 import NotFound from './pages/NotFound'
 import { ScrollTrigger } from './lib/motion'
+import { trackPageView } from './lib/analytics'
+import WhatsAppButton from './components/WhatsAppButton'
 
 function ScrollToTop() {
   const { pathname } = useLocation()
@@ -31,6 +33,10 @@ function ScrollToTop() {
       window.scrollTo(0, 0)
     })
     return () => cancelAnimationFrame(frame)
+  }, [pathname])
+  // After paint so the page has set its own document.title.
+  useEffect(() => {
+    trackPageView(pathname)
   }, [pathname])
   return null
 }
@@ -60,6 +66,8 @@ export default function App() {
         </Routes>
       </main>
       {!isProduct && <Footer />}
+      {/* Product pages have their own "Ask our Hakim on WhatsApp" button and a sticky buy bar. */}
+      {!isProduct && <WhatsAppButton />}
       <CartDrawer />
     </>
   )

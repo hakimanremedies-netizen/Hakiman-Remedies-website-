@@ -4,6 +4,7 @@ import { useCart } from '../lib/cart'
 import { formatPrice, shortTitle, variantLabel } from '../lib/catalog'
 import QtyStepper from '../components/QtyStepper'
 import Icon from '../components/Icon'
+import ShipProgress from '../components/ShipProgress'
 
 // Cart review. With Shopify connected, the button hands off to Shopify's hosted
 // checkout; without it this page is a demo that never collects payment details.
@@ -11,13 +12,20 @@ export default function Checkout() {
   const { items, subtotal, mrpTotal, setQty, remove, count, checkout } = useCart()
   const [redirecting, setRedirecting] = useState(false)
   const [error, setError] = useState(null)
+  const [code, setCode] = useState('')
+  const [codeError, setCodeError] = useState(null)
   const savings = mrpTotal - subtotal
 
   const goToCheckout = async () => {
     setRedirecting(true)
     setError(null)
+    setCodeError(null)
     try {
-      await checkout()
+      const cart = await checkout(code.trim())
+      if (cart.codeApplicable === false) {
+        setCodeError(`“${code.trim()}” isn’t valid for this cart. Check the code, or continue without it.`)
+        setRedirecting(false)
+      }
     } catch (err) {
       console.error(err)
       setError('We couldn’t start checkout. Please try again in a moment.')
@@ -88,6 +96,26 @@ export default function Checkout() {
             <div className="cart-totals__grand"><dt>Subtotal</dt><dd>{formatPrice(subtotal)}</dd></div>
           </dl>
           {savings > 0 && <p className="checkout__saving">You save {formatPrice(savings)} on this order</p>}
+          <ShipProgress subtotal={subtotal} />
+
+          {checkout && (
+            <div className="discount-code">
+              <label htmlFor="discount-code">Discount code</label>
+              <div className="discount-code__row">
+                <input
+                  id="discount-code"
+                  value={code}
+                  onChange={(e) => { setCode(e.target.value); setCodeError(null) }}
+                  autoComplete="off"
+                  spellCheck="false"
+                  aria-describedby={codeError ? 'discount-code-msg' : undefined}
+                />
+              </div>
+              {codeError
+                ? <p id="discount-code-msg" className="discount-code__msg" role="alert">{codeError}</p>
+                : <p className="fine">Automatic offers are applied at checkout.</p>}
+            </div>
+          )}
 
           <button
             className="btn btn--primary btn--lg btn--block"

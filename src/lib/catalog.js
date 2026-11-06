@@ -3,7 +3,7 @@
 // JSON snapshot and demo stock are used.
 import products from '../data/products.json'
 import inventory from '../data/demo/inventory.json'
-import { fetchShopifyProducts, shopifyEnabled } from './shopify'
+import { fetchShopSettings, fetchShopifyProducts, shopifyEnabled } from './shopify'
 
 // Display order follows the source homepage "Our Complete Range" grid.
 const SOURCE_ORDER = ['hk-24', 'hk-23', 'hk-22', 'hk-21', 'hk-13', 'hk-12', 'hk-11', 'hk-10']
@@ -12,9 +12,13 @@ const sortBySource = (list) => [...list].sort((a, b) => SOURCE_ORDER.indexOf(a.i
 
 let catalog = sortBySource(products)
 let live = false
+let settings = { freeShippingThreshold: null }
 
-// Shopify enforces real stock at checkout; this only caps the quantity stepper.
+// Caps the quantity stepper when Shopify doesn't report a stock count (untracked
+// inventory); Shopify still enforces real stock at checkout.
 const LIVE_MAX_QTY = 10
+// A tracked variant at or below this count shows the "Only N left" notice.
+export const LOW_STOCK_AT = 10
 
 const money = (m) => (m ? Number(m.amount) : null)
 
@@ -33,6 +37,8 @@ function fromShopify(sp) {
     compareAtPrice: money(v.compareAtPrice),
     sku: v.sku,
     available: v.availableForSale,
+    // null when inventory isn't tracked (or the storefront can't read it)
+    quantity: v.quantityAvailable ?? null,
   }))
   const base = local || {
     id: sp.id,
@@ -62,14 +68,17 @@ function fromShopify(sp) {
     sku: variants[0].sku,
     variants,
     availability: sp.availableForSale ? 'in_stock' : 'out_of_stock',
+    saleEndsAt: sp.saleEndsAt?.value ? new Date(sp.saleEndsAt.value) : null,
+    seo: sp.seo,
   }
 }
 
 export async function loadCatalog() {
   if (!shopifyEnabled) return
   try {
-    const remote = await fetchShopifyProducts()
+    const [remote, shop] = await Promise.all([fetchShopifyProducts(), fetchShopSettings().catch(() => settings)])
     catalog = sortBySource(remote.map(fromShopify))
+    settings = shop
     live = true
   } catch (err) {
     console.error('Shopify catalog failed to load; using the local snapshot.', err)
@@ -77,6 +86,7 @@ export async function loadCatalog() {
 }
 
 export const isLive = () => live
+export const getSettings = () => settings
 
 // Category descriptors describe the product format only — no health claims.
 export const CATEGORY_INFO = {
@@ -122,11 +132,24 @@ export function searchProducts(query) {
   )
 }
 
-// Live: Shopify availability. Otherwise demo-only stock, kept apart from the real catalog fields.
-export function getStock(id) {
-  if (live) return getProductById(id)?.availability === 'in_stock' ? LIVE_MAX_QTY : 0
-  return inventory.stock[id] ?? 0
+// Live: the variant's Shopify stock (or a cap when untracked). Otherwise demo-only
+// stock, kept apart from the real catalog fields.
+export function getStock(id, variantId) {
+  if (!live) return inventory.stock[id] ?? 0
+  const p = getProductById(id)
+  const v = p?.variants.find((x) => x.id === variantId) || p?.variants[0]
+  if (!v?.available) return 0
+  return v.quantity > 0 ? Math.min(v.quantity, LIVE_MAX_QTY) : LIVE_MAX_QTY
 }
+
+// "Only N left" count, only when Shopify reports genuinely low tracked stock.
+export function lowStock(variant) {
+  return live && variant?.available && variant.quantity > 0 && variant.quantity <= LOW_STOCK_AT ? variant.quantity : null
+}
+
+// A sale end date set on the product (metafield custom.sale_ends_at) that hasn't passed yet.
+export const activeSaleEnd = (p) => (p.saleEndsAt && p.saleEndsAt > Date.now() ? p.saleEndsAt : null)
+export const saleExpired = (p) => Boolean(p.saleEndsAt && p.saleEndsAt <= Date.now())
 
 export function shortTitle(p) {
   // Source cards use the full title; for the long PASHOYA title keep the part before the dash for tight UI.

@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useReducer, useState } from 'react'
 import { getProductById, getStock, isLive } from './catalog'
-import { createCheckoutUrl } from './shopify'
+import { track } from './analytics'
+import { createCart } from './shopify'
 
 const STORAGE_KEY = 'hakiman-demo-cart-v1'
 const CartContext = createContext(null)
@@ -17,7 +18,7 @@ function load() {
   }
 }
 
-const clampQty = (productId, qty) => Math.max(0, Math.min(qty, getStock(productId)))
+const clampQty = (productId, variantId, qty) => Math.max(0, Math.min(qty, getStock(productId, variantId)))
 
 function reducer(lines, action) {
   switch (action.type) {
@@ -25,14 +26,14 @@ function reducer(lines, action) {
       const existing = lines.find((l) => l.variantId === action.variantId)
       if (existing) {
         return lines.map((l) =>
-          l === existing ? { ...l, qty: clampQty(l.productId, l.qty + action.qty) } : l,
+          l === existing ? { ...l, qty: clampQty(l.productId, l.variantId, l.qty + action.qty) } : l,
         )
       }
-      return [...lines, { productId: action.productId, variantId: action.variantId, qty: clampQty(action.productId, action.qty) }]
+      return [...lines, { productId: action.productId, variantId: action.variantId, qty: clampQty(action.productId, action.variantId, action.qty) }]
     }
     case 'set':
       return lines
-        .map((l) => (l.variantId === action.variantId ? { ...l, qty: clampQty(l.productId, action.qty) } : l))
+        .map((l) => (l.variantId === action.variantId ? { ...l, qty: clampQty(l.productId, l.variantId, action.qty) } : l))
         .filter((l) => l.qty > 0)
     case 'remove':
       return lines.filter((l) => l.variantId !== action.variantId)
@@ -57,7 +58,9 @@ export function CartProvider({ children }) {
 
   const add = useCallback((product, qty = 1, { openDrawer = true, variantId } = {}) => {
     const variant = product.variants.find((v) => v.id === variantId) || product.variants[0]
+    if (getStock(product.id, variant.id) < 1) return
     dispatch({ type: 'add', productId: product.id, variantId: variant.id, qty })
+    track('add_to_cart', [{ product, variant, qty }])
     if (openDrawer) setOpen(true)
   }, [])
 
@@ -65,7 +68,7 @@ export function CartProvider({ children }) {
     const items = lines.map((l) => {
       const product = getProductById(l.productId)
       const variant = product.variants.find((v) => v.id === l.variantId) || product.variants[0]
-      return { ...l, product, variant, lineTotal: variant.price * l.qty, stock: getStock(l.productId) }
+      return { ...l, product, variant, lineTotal: variant.price * l.qty, stock: getStock(l.productId, l.variantId) }
     })
     return {
       items,
@@ -79,9 +82,13 @@ export function CartProvider({ children }) {
       remove: (variantId) => dispatch({ type: 'remove', variantId }),
       clear: () => dispatch({ type: 'clear' }),
       // Null until Shopify is connected; the checkout page shows the demo notice instead.
+      // Resolves to { codeApplicable: false } without leaving when a typed code is rejected.
       checkout: isLive()
-        ? async () => {
-            window.location.assign(await createCheckoutUrl(lines))
+        ? async (discountCode) => {
+            const cart = await createCart(lines, discountCode)
+            if (cart.codeApplicable === false) return cart
+            window.location.assign(cart.checkoutUrl)
+            return cart
           }
         : null,
     }

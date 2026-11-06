@@ -59,4 +59,18 @@ The site runs on the JSON snapshot until `.env.local` has the Shopify keys (see 
 - `npm run shopify:import` creates or updates the 8 products in Shopify via the Admin API (`-- --dry-run` to preview). Inventory is set to untracked; enter real stock in Shopify admin.
 - On Vercel, add `VITE_SHOPIFY_STORE_DOMAIN` and `VITE_SHOPIFY_STOREFRONT_TOKEN` as environment variables. Never add the Admin keys there.
 
-Still to do: customer accounts (`/account` is demo), and moving editorial content to metafields.
+Store-driven features (each stays hidden until its Shopify data exists, nothing is invented):
+
+| Feature | Set it in Shopify |
+| --- | --- |
+| "Only N pieces left" + stock bar, real max quantity | Track inventory on the variant, and give the Headless storefront the `unauthenticated_read_product_inventory` permission. Shown at 10 or fewer. |
+| Out of stock (buttons disabled) | Inventory at 0 with "Continue selling when out of stock" off |
+| Sale countdown; sale wording removed after it ends | Product metafield `custom.sale_ends_at` (Date and time, storefront access on) |
+| Free-shipping progress bar | Shop metafield `custom.free_shipping_threshold` (Integer), equal to the free-shipping rate's minimum |
+| Frequently bought together | Search & Discovery app → Product recommendations → Complementary |
+| Discount codes / automatic discounts | Discounts. Codes typed on `/checkout` are checked before leaving the site |
+| SEO title and description | Product → Search engine listing |
+
+Analytics: set `VITE_GA4_ID` and `VITE_META_PIXEL_ID` on Vercel. The site sends page views, view item and add to cart. Checkout and Purchase are sent from Shopify's checkout by the Google & YouTube and Facebook & Instagram apps, so they are never counted twice.
+
+Still to do: moving editorial content to metafields.

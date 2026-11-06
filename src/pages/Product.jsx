@@ -1,6 +1,9 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { CATEGORY_INFO, discount, formatPrice, getProduct, getProductById, getRelated, shortTitle, summary } from '../lib/catalog'
+import { CATEGORY_INFO, LOW_STOCK_AT, activeSaleEnd, discount, formatPrice, getProduct, getProductById, getRelated, getStock, isLive, lowStock, saleExpired, shortTitle, summary } from '../lib/catalog'
+import { track } from '../lib/analytics'
+import { fetchComplementaryHandles } from '../lib/shopify'
+import { useProductSeo } from '../lib/seo'
 import { useCart } from '../lib/cart'
 import { sx } from '../lib/sx'
 import { PDP_MOBILE, useMediaQuery } from '../lib/useMediaQuery'
@@ -22,6 +25,8 @@ const MARCELLUS = "font-family: 'Marcellus', Georgia, serif; font-weight: 400"
 function buildPage(product) {
   const d = discount(product)
   const price = formatPrice(product.price)
+  // Sale wording goes once the product's sale end date (if set) has passed.
+  const saleOn = d && !saleExpired(product)
   const base = {
     price,
     mrp: product.compareAtPrice ? formatPrice(product.compareAtPrice) : null,
@@ -50,7 +55,7 @@ function buildPage(product) {
     return {
       ...pashoya,
       ...base,
-      announce: pashoya.announce.map((a) => a ?? (d ? `${d.percent}% off launch price — today ${price}` : `Today ${price}`)),
+      announce: pashoya.announce.map((a) => a ?? (saleOn ? `${d.percent}% off launch price — today ${price}` : `Today ${price}`)),
       packs,
       defaultPack: packs ? (packs.find((p) => p.title === pashoya.defaultPack) || packs[0]).id : null,
       featured: true,
@@ -74,7 +79,7 @@ function buildPage(product) {
     crumb: label,
     crumbTo: `/shop?category=${product.category}`,
     eyebrow: `${label} · Hakiman, Lucknow`,
-    announce: ['Ships in 2–3 days · Delivered across India', d ? `${d.percent}% off — today ${price}` : `Today ${price}`, 'Consultations Sat – Sun, 9 AM – 2 PM'],
+    announce: ['Ships in 2–3 days · Delivered across India', saleOn ? `${d.percent}% off — today ${price}` : `Today ${price}`, 'Consultations Sat – Sun, 9 AM – 2 PM'],
     rating: null,
     lead: summary(product),
     leadMobile: summary(product),
@@ -223,7 +228,7 @@ function Bundles({ page, pack, setPack }) {
   )
 }
 
-function Delivery() {
+function Delivery({ soldOut }) {
   const [pin, setPin] = useState('')
   const [msg, setMsg] = useState('')
   const check = () => {
@@ -234,8 +239,8 @@ function Delivery() {
   return (
     <div style={sx('display: flex; flex-direction: column; gap: 10px; padding: 16px 18px; border-radius: 14px; background: #FFFFFF; border: 1px solid #EAD6C0')}>
       <div style={sx('display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 600')}>
-        <span aria-hidden="true" style={sx('width: 9px; height: 9px; border-radius: 50%; background: #2F7A4B')} />
-        In stock · Dispatched in 2–3 business days, delivered in 5–7
+        <span aria-hidden="true" style={sx(`width: 9px; height: 9px; border-radius: 50%; background: ${soldOut ? '#A3321F' : '#2F7A4B'}`)} />
+        {soldOut ? 'Out of stock right now' : 'In stock · Dispatched in 2–3 business days, delivered in 5–7'}
       </div>
       <form onSubmit={(e) => { e.preventDefault(); check() }} style={sx('display: flex; gap: 8px; flex-wrap: wrap; align-items: flex-end; margin: 0')}>
         <label style={sx('display: flex; flex-direction: column; gap: 4px; font-size: 12px; font-weight: 700; color: #6A5244; flex: 1 1 160px')}>Check delivery to your pincode
@@ -244,7 +249,69 @@ function Delivery() {
         <button type="submit" style={sx('height: 44px; padding: 0 18px; border-radius: 10px; border: 0; background: #3B2417; color: #FBEBD8; font-family: inherit; font-weight: 700; font-size: 14px; cursor: pointer')}>Check</button>
       </form>
       {msg && <div role="status" style={sx('font-size: 13px; color: #4E3A2E')}>{msg}</div>}
+      <div style={sx('font-size: 13px; color: #6A5244; border-top: 1px solid #EAD6C0; padding-top: 10px')}>
+        Pay securely with UPI, cards, net banking or wallets
+      </div>
     </div>
+  )
+}
+
+/* ───────── Stock and sale notices ───────── */
+
+function useNow(active) {
+  const [now, setNow] = useState(Date.now)
+  useEffect(() => {
+    if (!active) return
+    const t = setInterval(() => setNow(Date.now()), 1000)
+    return () => clearInterval(t)
+  }, [active])
+  return now
+}
+
+const pad = (n) => String(n).padStart(2, '0')
+
+// Countdown to the product's real sale end date (Shopify metafield custom.sale_ends_at).
+function SaleTimer({ ends, onEnd, m }) {
+  const now = useNow(Boolean(ends))
+  const left = ends ? ends - now : 0
+  useEffect(() => {
+    if (ends && left <= 0) onEnd()
+  }, [ends, left, onEnd])
+  if (left <= 0) return null
+  const secs = Math.floor(left / 1000)
+  const days = Math.floor(secs / 86400)
+  const clock = `${pad(Math.floor((secs % 86400) / 3600))}:${pad(Math.floor((secs % 3600) / 60))}:${pad(secs % 60)}`
+  return (
+    <div role="timer" aria-label={`Sale ends in ${days ? `${days} days ` : ''}${clock}`} style={sx(`display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: ${m ? '10px 12px' : '12px 16px'}; border-radius: 12px; background: #FCE3CF; color: #8A3A0C; font-size: ${m ? '13px' : '14px'}; font-weight: 700`)}>
+      <span>Sale ends in</span>
+      <span aria-hidden="true" style={sx('font-variant-numeric: tabular-nums; font-weight: 800; font-size: 16px; color: #2B1A11')}>{days > 0 && `${days}d `}{clock}</span>
+      <span style={sx('font-weight: 500; color: #6A5244')}>· {ends.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}</span>
+    </div>
+  )
+}
+
+// Shown only when Shopify reports a tracked stock count at or below LOW_STOCK_AT.
+function StockNotice({ variant, m }) {
+  const left = lowStock(variant)
+  if (!left) return null
+  return (
+    <div style={sx('display: flex; flex-direction: column; gap: 6px')}>
+      <div style={sx(`font-size: ${m ? '13px' : '14px'}; font-weight: 800; color: #A3321F`)}>
+        Only {left} {left === 1 ? 'piece' : 'pieces'} left
+      </div>
+      <div aria-hidden="true" style={sx('height: 6px; border-radius: 999px; background: #F2DCC6; overflow: hidden')}>
+        <span style={sx(`display: block; height: 100%; width: ${Math.max(8, (left / LOW_STOCK_AT) * 100)}%; background: #B9470C; border-radius: 999px`)} />
+      </div>
+    </div>
+  )
+}
+
+function Notices({ buy, m }) {
+  return (
+    <>
+      <SaleTimer ends={buy.saleEnds} onEnd={buy.onSaleEnd} m={m} />
+      <StockNotice variant={buy.variant} m={m} />
+    </>
   )
 }
 
@@ -267,7 +334,7 @@ function Accordions({ items, m }) {
 }
 
 function DesktopTop({ page, buy }) {
-  const { pack, setPack, qty, setQty, selPrice, addToCart, buyNow, added } = buy
+  const { pack, setPack, qty, setQty, selPrice, addToCart, buyNow, added, soldOut, maxQty } = buy
   return (
     <section style={sx('max-width: 1280px; margin: 0 auto; padding: 20px 24px 56px; display: flex; flex-wrap: wrap; gap: 48px; width: 100%; box-sizing: border-box')}>
       <DesktopGallery page={page} />
@@ -302,24 +369,26 @@ function DesktopTop({ page, buy }) {
           ))}
         </ul>
 
+        <Notices buy={buy} />
+
         {page.packs && <Bundles page={page} pack={pack} setPack={setPack} />}
 
         <div style={sx('display: flex; gap: 12px; flex-wrap: wrap')}>
           <div style={sx('display: flex; align-items: center; border: 1.5px solid #D9BFA3; border-radius: 14px; background: #FFFFFF')}>
             <button aria-label="Decrease quantity" onClick={() => setQty(Math.max(1, qty - 1))} style={sx('width: 48px; height: 56px; border: 0; background: transparent; font-size: 22px; color: #2B1A11; cursor: pointer')}>−</button>
             <span aria-live="polite" style={sx('min-width: 28px; text-align: center; font-weight: 800; font-size: 17px')}>{qty}</span>
-            <button aria-label="Increase quantity" onClick={() => setQty(Math.min(9, qty + 1))} style={sx('width: 48px; height: 56px; border: 0; background: transparent; font-size: 22px; color: #2B1A11; cursor: pointer')}>+</button>
+            <button aria-label="Increase quantity" onClick={() => setQty(Math.min(maxQty, qty + 1))} disabled={qty >= maxQty} style={sx('width: 48px; height: 56px; border: 0; background: transparent; font-size: 22px; color: #2B1A11; cursor: pointer')}>+</button>
           </div>
-          <button onClick={addToCart} style={sx('flex: 1 1 160px; height: 58px; border-radius: 14px; border: 2px solid #2B1A11; background: #FFFFFF; color: #2B1A11; font-family: inherit; font-size: 16px; font-weight: 800; cursor: pointer')}>{added ? 'Added to cart' : 'Add to cart'}</button>
+          <button onClick={addToCart} disabled={soldOut} style={sx(`flex: 1 1 160px; height: 58px; border-radius: 14px; border: 2px solid #2B1A11; background: #FFFFFF; color: #2B1A11; font-family: inherit; font-size: 16px; font-weight: 800; cursor: ${soldOut ? 'not-allowed' : 'pointer'}; opacity: ${soldOut ? 0.5 : 1}`)}>{soldOut ? 'Out of stock' : added ? 'Added to cart' : 'Add to cart'}</button>
         </div>
-        <button data-hk-cta onClick={buyNow} style={sx(`height: 62px; border-radius: 14px; border: 0; background: ${CTA}; color: #FFFFFF; font-family: inherit; font-size: 18px; font-weight: 800; letter-spacing: 0.01em; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px`)}>Buy now · <span>{selPrice}</span> <ArrowRight /></button>
+        <button data-hk-cta onClick={buyNow} disabled={soldOut} style={sx(`height: 62px; border-radius: 14px; border: 0; background: ${soldOut ? '#8C7B70' : CTA}; color: #FFFFFF; font-family: inherit; font-size: 18px; font-weight: 800; letter-spacing: 0.01em; cursor: ${soldOut ? 'not-allowed' : 'pointer'}; display: flex; align-items: center; justify-content: center; gap: 10px`)}>{soldOut ? 'Out of stock' : <>Buy now · <span>{selPrice}</span> <ArrowRight /></>}</button>
 
         <a href={askHref(page.name)} target="_blank" rel="noreferrer" style={sx('display: flex; align-items: center; justify-content: center; gap: 10px; min-height: 48px; border-radius: 14px; background: #E6F3EA; color: #1E5B36; font-size: 15px; font-weight: 700; text-decoration: none; padding: 0 16px')}>
           <WhatsAppIcon />
           Not sure it's right for you? Ask our Hakim on WhatsApp
         </a>
 
-        <Delivery />
+        <Delivery soldOut={soldOut} />
 
         <div style={sx(`display: grid; grid-template-columns: repeat(${page.trust.length}, minmax(0, 1fr)); gap: 10px`)}>
           {page.trust.map((t) => (
@@ -373,7 +442,7 @@ function MobileGallery({ page }) {
 }
 
 function MobileTop({ page, buy }) {
-  const { pack, setPack, selPrice, buyNow } = buy
+  const { pack, setPack, selPrice, buyNow, soldOut } = buy
   return (
     <>
       <MobileGallery page={page} />
@@ -395,6 +464,8 @@ function MobileTop({ page, buy }) {
           ))}
         </ul>
 
+        <Notices buy={buy} m />
+
         {page.packs && (
           <div role="radiogroup" aria-label="Choose your pack" style={sx('display: flex; flex-direction: column; gap: 8px; padding-top: 4px')}>
             {page.packs.map((b) => {
@@ -413,7 +484,7 @@ function MobileTop({ page, buy }) {
           </div>
         )}
 
-        <button data-hk-cta onClick={buyNow} style={sx(`height: 56px; border-radius: 14px; border: 0; background: ${CTA}; color: #FFFFFF; font-family: inherit; font-size: 17px; font-weight: 800; cursor: pointer`)}>Buy now · {selPrice}</button>
+        <button data-hk-cta onClick={buyNow} disabled={soldOut} style={sx(`height: 56px; border-radius: 14px; border: 0; background: ${soldOut ? '#8C7B70' : CTA}; color: #FFFFFF; font-family: inherit; font-size: 17px; font-weight: 800; cursor: ${soldOut ? 'not-allowed' : 'pointer'}`)}>{soldOut ? 'Out of stock' : `Buy now · ${selPrice}`}</button>
         <a href={askHref(page.name)} target="_blank" rel="noreferrer" style={sx('display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 46px; border-radius: 12px; background: #E6F3EA; color: #1E5B36; font-size: 14px; font-weight: 700; text-decoration: none')}>Ask our Hakim on WhatsApp</a>
 
         <div style={sx(`display: grid; grid-template-columns: repeat(${page.trustMobile.length}, minmax(0, 1fr)); gap: 8px; font-size: 12px; font-weight: 700; text-align: center`)}>
@@ -876,7 +947,7 @@ const hidden = (show, offset) => show
   ? 'transform: translateY(0); opacity: 1; visibility: visible; transition: transform 0.35s ease, opacity 0.35s ease, visibility 0s'
   : `transform: translateY(${offset}); opacity: 0; visibility: hidden; transition: transform 0.35s ease, opacity 0.35s ease, visibility 0s 0.35s`
 
-function StickyBar({ page, m, sel, selPrice, buyNow, show }) {
+function StickyBar({ page, m, sel, selPrice, buyNow, show, soldOut }) {
   if (m) {
     const line = sel ? `${sel.title} · ${sel.price}` : `${page.name} · ${page.price}`
     return (
@@ -885,7 +956,7 @@ function StickyBar({ page, m, sel, selPrice, buyNow, show }) {
           <div style={sx('font-weight: 800; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis')}>{line}</div>
           <div style={sx('font-size: 12px; color: #6A5244')}>Ships in 2–3 days</div>
         </div>
-        <button onClick={buyNow} style={sx(`height: 50px; padding: 0 26px; border-radius: 12px; border: 0; background: ${CTA}; color: #FFFFFF; font-family: inherit; font-size: 16px; font-weight: 800; cursor: pointer; flex: none`)}>Buy now</button>
+        <button onClick={buyNow} style={sx(`height: 50px; padding: 0 26px; border-radius: 12px; border: 0; background: ${soldOut ? '#8C7B70' : CTA}; color: #FFFFFF; font-family: inherit; font-size: 16px; font-weight: 800; cursor: pointer; flex: none`)} disabled={soldOut}>{soldOut ? 'Out of stock' : 'Buy now'}</button>
       </div>
     )
   }
@@ -898,10 +969,28 @@ function StickyBar({ page, m, sel, selPrice, buyNow, show }) {
           <div style={sx('font-size: 13px; color: #6A5244')}>{sel ? `${sel.title} · ${page.size} each` : page.sizeNote}</div>
         </div>
         <div style={sx('font-weight: 800; font-size: 17px')}>{selPrice}</div>
-        <button onClick={buyNow} style={sx(`height: 50px; padding: 0 24px; border-radius: 12px; border: 0; background: ${CTA}; color: #FFFFFF; font-family: inherit; font-size: 16px; font-weight: 800; cursor: pointer`)}>Buy now</button>
+        <button onClick={buyNow} style={sx(`height: 50px; padding: 0 24px; border-radius: 12px; border: 0; background: ${soldOut ? '#8C7B70' : CTA}; color: #FFFFFF; font-family: inherit; font-size: 16px; font-weight: 800; cursor: pointer`)} disabled={soldOut}>{soldOut ? 'Out of stock' : 'Buy now'}</button>
       </div>
     </div>
   )
+}
+
+// "Frequently bought together" from Shopify (Search & Discovery app → Product
+// recommendations → Complementary products); the page's own picks until that is set up.
+function useComplementary(product, fallback) {
+  const [picks, setPicks] = useState(null)
+  useEffect(() => {
+    if (!isLive() || !product.shopifyId) return
+    let off = false
+    fetchComplementaryHandles(product.shopifyId)
+      .then((handles) => {
+        const list = handles.map(getProduct).filter((p) => p && p.id !== product.id && getStock(p.id) > 0)
+        if (!off && list.length) setPicks(list.slice(0, 3))
+      })
+      .catch(() => {})
+    return () => { off = true }
+  }, [product])
+  return picks ? { crossSell: picks, crossSellTitle: 'Frequently bought together' } : { crossSell: fallback }
 }
 
 /* ───────── Page ───────── */
@@ -922,29 +1011,42 @@ function ProductPage({ product }) {
   const [pack, setPack] = useState(page.defaultPack ?? null)
   const [qty, setQty] = useState(1)
   const [added, setAdded] = useState(false)
+  const [, rerender] = useState(0)
+  const onSaleEnd = useCallback(() => rerender((n) => n + 1), [])
   const root = useRef(null)
   const barShown = useStickyBarVisible(root)
+  const crossSell = useComplementary(product, page.crossSell)
 
-  useEffect(() => {
-    document.title = `${page.name} | The Hakiman`
-    return () => { document.title = 'The Hakiman — Ayurvedic & Unani Remedies' }
-  }, [page.name])
+  useProductSeo(product, page.name)
 
   const sel = page.packs?.find((p) => p.id === pack) || null
+  const variant = product.variants.find((v) => v.id === sel?.id) || product.variants[0]
+  const maxQty = getStock(product.id, variant.id)
+  const soldOut = maxQty < 1
+
+  useEffect(() => {
+    track('view_item', [{ product, variant: product.variants[0], qty: 1 }])
+  }, [product])
   // The mobile design has no quantity stepper, so a mobile buy is one pack.
   const buyQty = m ? 1 : qty
   const selPrice = formatPrice((sel ? sel.unitPrice : product.price) * buyQty)
 
   const addToCart = () => {
-    add(product, qty, { variantId: sel?.id })
+    if (soldOut) return
+    add(product, Math.min(qty, maxQty), { variantId: sel?.id })
     setAdded(true)
     setTimeout(() => setAdded(false), 1400)
   }
   const buyNow = () => {
+    if (soldOut) return
     add(product, buyQty, { openDrawer: false, variantId: sel?.id })
     navigate('/checkout')
   }
-  const buy = { pack, setPack, qty, setQty, selPrice: m && !sel ? page.price : selPrice, addToCart, buyNow, added }
+  const buy = {
+    pack, setPack, qty, setQty, selPrice: m && !sel ? page.price : selPrice, addToCart, buyNow, added,
+    variant, soldOut, maxQty: Math.max(1, maxQty), saleEnds: activeSaleEnd(product), onSaleEnd,
+  }
+  const view = { ...page, ...crossSell }
 
   return (
     <div ref={root} className="hk-pdp" style={sx("font-family: 'Manrope', system-ui, sans-serif; color: #2B1A11; background: #FBF5EC; min-height: 100%; display: flex; flex-direction: column")}>
@@ -979,7 +1081,7 @@ function ProductPage({ product }) {
             )}
             <Faq page={page} m />
             <FinalOffer page={page} m buyNow={buyNow} />
-            <CrossSell page={page} m />
+            <CrossSell page={view} m />
           </>
         ) : (
           <>
@@ -1000,13 +1102,13 @@ function ProductPage({ product }) {
             )}
             <Faq page={page} />
             <FinalOffer page={page} buyNow={buyNow} />
-            <CrossSell page={page} />
+            <CrossSell page={view} />
           </>
         )}
       </div>
 
       <PdpFooter m={m} />
-      <StickyBar page={page} m={m} sel={sel} selPrice={buy.selPrice} buyNow={buyNow} show={barShown} />
+      <StickyBar page={page} m={m} sel={sel} selPrice={buy.selPrice} buyNow={buyNow} show={barShown} soldOut={soldOut} />
     </div>
   )
 }

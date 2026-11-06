@@ -582,3 +582,30 @@ a.contact__card:hover { border-color: var(--green); }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
 }
+
+/* Floating WhatsApp support */
+.wa-fab {
+  position: fixed; right: 20px; bottom: max(20px, env(safe-area-inset-bottom)); z-index: 30;
+  width: 56px; height: 56px; border-radius: 50%; display: grid; place-items: center;
+  background: #25d366; color: #fff; box-shadow: 0 8px 24px -6px rgba(0, 0, 0, 0.35);
+  transition: transform 0.2s var(--ease);
+}
+.wa-fab:hover { transform: scale(1.06); }
+.wa-fab:focus-visible { outline: 3px solid var(--green); outline-offset: 3px; }
+body.no-scroll .wa-fab { display: none; }
+
+/* Free shipping progress (cart drawer and cart page) */
+.ship-progress { display: grid; gap: 8px; font-size: 14px; }
+.ship-progress p { margin: 0; }
+.ship-progress__bar { height: 6px; border-radius: 999px; background: var(--ivory-2); overflow: hidden; }
+.ship-progress__bar span { display: block; height: 100%; background: var(--green); border-radius: inherit; transition: width 0.4s var(--ease); }
+
+/* Discount code on the cart page */
+.discount-code { display: grid; gap: 6px; }
+.discount-code__row { display: flex; gap: 8px; }
+.discount-code input {
+  flex: 1; min-width: 0; height: 44px; padding: 0 12px; border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm); font: inherit; background: var(--paper); text-transform: uppercase;
+}
+.discount-code label { font-size: 13px; font-weight: 700; color: var(--muted); }
+.discount-code__msg { margin: 0; font-size: 13px; color: #a3321f; }

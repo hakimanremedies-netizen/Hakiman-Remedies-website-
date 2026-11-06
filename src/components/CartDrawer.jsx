@@ -4,6 +4,7 @@ import { useCart } from '../lib/cart'
 import { formatPrice, isLive, shortTitle, variantLabel } from '../lib/catalog'
 import Icon from './Icon'
 import QtyStepper from './QtyStepper'
+import ShipProgress from './ShipProgress'
 
 export default function CartDrawer() {
   const { items, open, setOpen, subtotal, mrpTotal, count, setQty, remove } = useCart()
@@ -66,7 +67,7 @@ export default function CartDrawer() {
                     {variantLabel(i.product, i.variant) && <div className="cart-line__variant">{variantLabel(i.product, i.variant)}</div>}
                     <div className="cart-line__unit">
                       {formatPrice(i.variant.price)}
-                      {i.variant.compareAtPrice && <s>{formatPrice(i.variant.compareAtPrice)}</s>}
+                      {i.variant.compareAtPrice > i.variant.price && <s>{formatPrice(i.variant.compareAtPrice)}</s>}
                     </div>
                     <div className="cart-line__row">
                       <QtyStepper
@@ -88,6 +89,7 @@ export default function CartDrawer() {
             </ul>
 
             <footer className="cart-drawer__foot">
+              <ShipProgress subtotal={subtotal} />
               <dl className="cart-totals">
                 <div>
                   <dt>Subtotal</dt>
