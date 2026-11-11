@@ -48,7 +48,7 @@ export default function Footer() {
         </address>
       </div>
       <div className="container footer__base">
-        <span>© 2026 The Hakiman. All rights reserved.</span>
+        <span>© 2026 {brand.legalName}. All rights reserved. · GSTIN {brand.gstin}</span>
         {!isLive() && <span>Prototype storefront · demo cart &amp; checkout</span>}
       </div>
     </footer>

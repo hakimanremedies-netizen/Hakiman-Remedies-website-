@@ -4,6 +4,7 @@
 export const brand = {
   name: 'The Hakiman',
   legalName: 'Hakiman Remedies',
+  gstin: '09AAICH0544H1ZM',
   logo: '/assets/logo.png',
   emblem: '/assets/fab.png',
   sourceUrl: 'https://thehakiman.com/',
