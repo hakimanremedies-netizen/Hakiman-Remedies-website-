@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "node scripts/sitemap.mjs && vite build",
     "preview": "vite preview",
     "import:catalog": "python -I scripts/import-catalog.py source-snapshot/html",
     "import:policies": "python -I scripts/import-policies.py source-snapshot/html",
