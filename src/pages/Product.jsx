@@ -1023,17 +1023,19 @@ function ProductPage({ product }) {
   const variant = product.variants.find((v) => v.id === sel?.id) || product.variants[0]
   const maxQty = getStock(product.id, variant.id)
   const soldOut = maxQty < 1
+  // Switching to a pack with less stock lowers the chosen quantity to fit.
+  const shownQty = Math.min(qty, Math.max(1, maxQty))
 
   useEffect(() => {
     track('view_item', [{ product, variant: product.variants[0], qty: 1 }])
   }, [product])
   // The mobile design has no quantity stepper, so a mobile buy is one pack.
-  const buyQty = m ? 1 : qty
+  const buyQty = m ? 1 : shownQty
   const selPrice = formatPrice((sel ? sel.unitPrice : product.price) * buyQty)
 
   const addToCart = () => {
     if (soldOut) return
-    add(product, Math.min(qty, maxQty), { variantId: sel?.id })
+    add(product, shownQty, { variantId: sel?.id })
     setAdded(true)
     setTimeout(() => setAdded(false), 1400)
   }
@@ -1043,7 +1045,7 @@ function ProductPage({ product }) {
     navigate('/checkout')
   }
   const buy = {
-    pack, setPack, qty, setQty, selPrice: m && !sel ? page.price : selPrice, addToCart, buyNow, added,
+    pack, setPack, qty: shownQty, setQty, selPrice: m && !sel ? page.price : selPrice, addToCart, buyNow, added,
     variant, soldOut, maxQty: Math.max(1, maxQty), saleEnds: activeSaleEnd(product), onSaleEnd,
   }
   const view = { ...page, ...crossSell }

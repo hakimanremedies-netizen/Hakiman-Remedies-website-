@@ -43,7 +43,8 @@ function ScrollToTop() {
 
 export default function App() {
   // Product pages carry their own header and footer from the product-page design.
-  const isProduct = useLocation().pathname.startsWith('/products/')
+  const { pathname } = useLocation()
+  const isProduct = pathname.startsWith('/products/')
   return (
     <>
       <a className="skip-link" href="#main">Skip to content</a>
@@ -66,8 +67,8 @@ export default function App() {
         </Routes>
       </main>
       {!isProduct && <Footer />}
-      {/* Product pages have their own "Ask our Hakim on WhatsApp" button and a sticky buy bar. */}
-      {!isProduct && <WhatsAppButton />}
+      {/* Product pages have their own WhatsApp button; on the cart it would cover the checkout button. */}
+      {!isProduct && pathname !== '/checkout' && <WhatsAppButton />}
       <CartDrawer />
     </>
   )
