@@ -161,7 +161,7 @@ export function PdpFooter({ m }) {
     <footer style={sx('background: #2B1A11; color: #E9D2B8')}>
       <div style={sx(`max-width: 1280px; margin: 0 auto; padding: ${m ? '40px 16px 24px' : '48px 24px 24px'}; display: flex; flex-wrap: wrap; gap: 32px; justify-content: space-between; font-size: 14px; line-height: 1.7`)}>
         <div style={sx('max-width: 360px')}><div style={sx("font-family: 'Marcellus', Georgia, serif; font-size: 24px; color: #FBEBD8")}>Hakiman</div><div>Unani &amp; Ayurvedic wellness, crafted with generations of healing wisdom.</div></div>
-        <div><div style={sx('font-weight: 800; color: #FBEBD8')}>Visit</div><div>Shop No 2 UGF, Aishbagh Rd<br />Lucknow 226003</div></div>
+        <div><div style={sx('font-weight: 800; color: #FBEBD8')}>Visit</div><div>Shop No. 2 UGF, Asharfabad, Chowk<br />Lucknow 226003</div></div>
         <div><div style={sx('font-weight: 800; color: #FBEBD8')}>Talk to us</div><div>+91 88811 16681 (call / WhatsApp)<br />hakimanremedies@gmail.com</div></div>
       </div>
       {/* Bottom padding leaves room for the sticky buy bar. */}

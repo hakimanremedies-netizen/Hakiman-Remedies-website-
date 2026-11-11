@@ -129,7 +129,7 @@ const pashoyaDraft = {
     { label: 'Traditional Unani minerals', a: 'Yes', b: 'No', c: 'Rarely', d: 'No' },
   ],
   heritage: {
-    title: 'From a family Unani practice on Aishbagh Road, Lucknow.',
+    title: 'From a family Unani practice in Chowk, Lucknow.',
     text: 'Hakiman began as a neighbourhood herbal practice that treated every patron like family. PASHOYA is the foot soak our elders prepared for people who spent their days on their feet — now measured, lab tested and sealed in a jar.',
     quote: '“[A short line from the family Hakim on why PASHOYA was made.]”',
     cite: '— [Name], [title], Hakiman',

@@ -15,7 +15,7 @@ export const brand = {
     phoneHref: 'tel:+918881116681',
     whatsapp: '918881116681',
     email: 'hakimanremedies@gmail.com',
-    address: '293/640/293/192, Shop No 2 UGF Aishbagh Rd, Lucknow, Uttar Pradesh - 226003',
+    address: '295/640 (295/389), Shop No. 2 UGF, Asharfabad, Chowk, Lucknow, Uttar Pradesh - 226003',
     hours: 'Saturday – Sunday | 9:00 AM – 2:00 PM',
     hoursNote: 'Appointments are highly recommended for personalized in-person consultations with our Hakim.',
   },
