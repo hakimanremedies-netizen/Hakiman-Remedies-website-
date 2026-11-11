@@ -16,7 +16,8 @@ function setMeta(selector, attrs) {
 
 // Title, description, canonical URL and Product structured data for a product page.
 // Shopify's product SEO fields (Search engine listing) win over the defaults.
-export function useProductSeo(product, name) {
+// `rating` ({ average, count }) comes from published Judge.me reviews.
+export function useProductSeo(product, name, rating) {
   useEffect(() => {
     const url = `${SITE}/products/${product.handle}`
     const description = product.seo?.description || summary(product)
@@ -37,6 +38,9 @@ export function useProductSeo(product, name) {
       image: product.images.map((src) => new URL(src, SITE).href),
       sku: product.sku,
       brand: { '@type': 'Brand', name: product.brand || 'Hakiman' },
+      aggregateRating: rating?.count
+        ? { '@type': 'AggregateRating', ratingValue: rating.average.toFixed(1), reviewCount: rating.count }
+        : undefined,
       offers: product.variants.map((v) => ({
         '@type': 'Offer',
         url,
@@ -56,5 +60,5 @@ export function useProductSeo(product, name) {
       canonical.remove()
       ld.remove()
     }
-  }, [product, name])
+  }, [product, name, rating?.average, rating?.count])
 }

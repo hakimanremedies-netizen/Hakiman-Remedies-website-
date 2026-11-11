@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { CATEGORY_INFO, LOW_STOCK_AT, activeSaleEnd, discount, formatPrice, getProduct, getProductById, getRelated, getStock, isLive, lowStock, saleExpired, shortTitle, summary } from '../lib/catalog'
 import { track } from '../lib/analytics'
 import { fetchComplementaryHandles } from '../lib/shopify'
+import { fetchReviews } from '../lib/reviews'
 import { useProductSeo } from '../lib/seo'
 import { useCart } from '../lib/cart'
 import { sx } from '../lib/sx'
@@ -353,7 +354,7 @@ function DesktopTop({ page, buy }) {
           <h1 style={sx(`margin: 0; ${MARCELLUS}; font-size: 44px; line-height: 1.08; letter-spacing: -0.01em`)}>{page.name}</h1>
           {page.rating && (
             <a href="#reviews" style={sx('display: inline-flex; align-items: center; gap: 8px; font-size: 14px; color: #6A5244; text-decoration: none')}>
-              <span aria-hidden="true" style={sx('color: #D9822B; letter-spacing: 2px; font-size: 16px')}>★★★★★</span>
+              <span aria-hidden="true" style={sx('color: #D9822B; letter-spacing: 2px; font-size: 16px')}>{page.ratingStars || '★★★★★'}</span>
               <span>{page.rating}</span>
             </a>
           )}
@@ -456,7 +457,7 @@ function MobileTop({ page, buy }) {
       <MobileGallery page={page} />
       <div style={sx('padding: 8px 16px 0; display: flex; flex-direction: column; gap: 12px')}>
         {page.ratingMobile && (
-          <a href="#reviews" style={sx('font-size: 13px; color: #6A5244; text-decoration: none')}><span aria-hidden="true" style={sx('color: #D9822B; letter-spacing: 2px')}>★★★★★</span> {page.ratingMobile}</a>
+          <a href="#reviews" style={sx('font-size: 13px; color: #6A5244; text-decoration: none')}><span aria-hidden="true" style={sx('color: #D9822B; letter-spacing: 2px')}>{page.ratingStars || '★★★★★'}</span> {page.ratingMobile}</a>
         )}
         <h1 style={sx(`margin: 0; ${MARCELLUS}; font-size: 32px; line-height: 1.1`)}>{page.name}</h1>
         <p style={sx('margin: 0; font-size: 17px; line-height: 1.4; font-weight: 600')}>{page.leadMobile}</p>
@@ -804,13 +805,13 @@ function Reviews({ page, m }) {
         <div style={sx(`display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: ${m ? '16px' : '24px'}; margin-bottom: ${m ? '20px' : '32px'}`)}>
           <div>
             <div style={eyebrowStyle(m)}>Reviews</div>
-            <h2 style={h2Style(m, '42px')}>What soakers are saying</h2>
+            <h2 style={h2Style(m, '42px')}>{page.featured ? 'What soakers are saying' : 'What customers are saying'}</h2>
           </div>
           <div style={sx('display: flex; align-items: center; gap: 16px; flex-wrap: wrap')}>
             {page.reviewScore && page.reviewCount && (
               <>
                 <div style={sx(`font-family: 'Marcellus', Georgia, serif; font-size: ${m ? '40px' : '52px'}; line-height: 1`)}>{page.reviewScore}</div>
-                <div><div aria-hidden="true" style={sx('color: #D9822B; letter-spacing: 3px; font-size: 18px')}>★★★★★</div><div style={sx('font-size: 14px; color: #6A5244')}>{page.reviewCount}</div></div>
+                <div><div aria-hidden="true" style={sx('color: #D9822B; letter-spacing: 3px; font-size: 18px')}>{page.reviewStars || '★★★★★'}</div><div style={sx('font-size: 14px; color: #6A5244')}>{page.reviewCount}</div></div>
               </>
             )}
             <a href={whatsappHref(`Hi Hakiman, I'd like to share a review of ${page.name}.`)} target="_blank" rel="noreferrer" style={sx('display: inline-flex; align-items: center; height: 48px; box-sizing: border-box; padding: 0 20px; border-radius: 12px; border: 2px solid #2B1A11; background: #FFFFFF; font-weight: 800; font-size: 14px; cursor: pointer; color: #2B1A11; text-decoration: none')}>Write a review</a>
@@ -824,11 +825,11 @@ function Reviews({ page, m }) {
         ) : (
           <div style={sx('display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px')}>
             {page.reviews.map((rv) => (
-              <article key={rv.head} style={sx('background: #FBF5EC; border: 1px solid #EAD6C0; border-radius: 18px; padding: 24px; display: flex; flex-direction: column; gap: 12px')}>
-                <div aria-hidden="true" style={sx('color: #D9822B; letter-spacing: 2px')}>★★★★★</div>
+              <article key={rv.id || rv.head} style={sx('background: #FBF5EC; border: 1px solid #EAD6C0; border-radius: 18px; padding: 24px; display: flex; flex-direction: column; gap: 12px')}>
+                <div role="img" aria-label={`${rv.rating || 5} out of 5 stars`} style={sx('color: #D9822B; letter-spacing: 2px')}>{stars(rv.rating || 5)}</div>
                 <h3 style={sx('margin: 0; font-size: 17px; font-weight: 800; line-height: 1.35')}>{rv.head}</h3>
                 <p style={sx('margin: 0; font-size: 14px; line-height: 1.6; color: #6A5244; flex: 1')}>{rv.body}</p>
-                <div style={sx('display: flex; justify-content: space-between; font-size: 13px; color: #6A5244')}><span style={sx('font-weight: 700; color: #2B1A11')}>{rv.who}</span><span>Verified buyer</span></div>
+                <div style={sx('display: flex; justify-content: space-between; font-size: 13px; color: #6A5244')}><span style={sx('font-weight: 700; color: #2B1A11')}>{rv.who}</span>{rv.verified !== false && <span>Verified buyer</span>}</div>
               </article>
             ))}
           </div>
@@ -1001,6 +1002,34 @@ function useComplementary(product, fallback) {
   return picks ? { crossSell: picks, crossSellTitle: 'Frequently bought together' } : { crossSell: fallback }
 }
 
+// Published Judge.me reviews for this product; nothing changes until there is one.
+function useReviews(product) {
+  const [data, setData] = useState(null)
+  useEffect(() => {
+    if (!isLive()) return
+    let off = false
+    fetchReviews(product.handle)
+      .then((r) => { if (!off && r?.count && r.reviews.length) setData(r) })
+      .catch(() => {})
+    return () => { off = true }
+  }, [product])
+  if (!data) return null
+  const score = data.average.toFixed(1)
+  const n = `${data.count} ${data.count === 1 ? 'review' : 'reviews'}`
+  return {
+    count: data.count,
+    reviews: data.reviews,
+    reviewScore: score,
+    reviewStars: stars(data.average),
+    reviewCount: `Based on ${n}`,
+    rating: `${score} · ${n}`,
+    ratingMobile: `${score} · ${n}`,
+    ratingStars: stars(data.average),
+  }
+}
+
+const stars = (r) => '★'.repeat(Math.round(r)) + '☆'.repeat(5 - Math.round(r))
+
 /* ───────── Page ───────── */
 
 export default function Product() {
@@ -1015,7 +1044,8 @@ function ProductPage({ product }) {
   const m = useMediaQuery(PDP_MOBILE)
   const navigate = useNavigate()
   const { add } = useCart()
-  const page = buildPage(product)
+  const reviews = useReviews(product)
+  const page = { ...buildPage(product), ...reviews }
   const [pack, setPack] = useState(page.defaultPack ?? null)
   const [qty, setQty] = useState(1)
   const [added, setAdded] = useState(false)
@@ -1025,7 +1055,7 @@ function ProductPage({ product }) {
   const barShown = useStickyBarVisible(root)
   const crossSell = useComplementary(product, page.crossSell)
 
-  useProductSeo(product, page.name)
+  useProductSeo(product, page.name, reviews && { average: Number(reviews.reviewScore), count: reviews.count })
 
   const sel = page.packs?.find((p) => p.id === pack) || null
   const variant = product.variants.find((v) => v.id === sel?.id) || product.variants[0]
@@ -1087,6 +1117,7 @@ function ProductPage({ product }) {
                 <div style={sx('padding: 28px 16px 0')}><Accordions items={page.accordions} m /></div>
                 <BenefitStrip page={page} m />
                 <Highlights page={page} m />
+                {page.reviews?.length > 0 && <Reviews page={page} m />}
               </>
             )}
             <Faq page={page} m />
@@ -1108,7 +1139,10 @@ function ProductPage({ product }) {
                 <Reviews page={page} />
               </>
             ) : (
-              <Highlights page={page} />
+              <>
+                <Highlights page={page} />
+                {page.reviews?.length > 0 && <Reviews page={page} />}
+              </>
             )}
             <Faq page={page} />
             <FinalOffer page={page} buyNow={buyNow} />
