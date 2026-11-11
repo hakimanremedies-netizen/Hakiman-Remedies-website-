@@ -4,12 +4,12 @@ import { ingredientGroups, ingredientsNotPublished } from '../data/ingredients'
 import { getProduct, shortTitle } from '../lib/catalog'
 import { useReveal } from '../lib/motion'
 
-const PASHOYA = 'pashoya-pain-salt-joint-support-amp-amp-amp-amp-natural-body-detox-salt-250-g-'
+const PASHOYA = 'pashoya-pain-salt'
 const GROUP_IMAGE = {
   minerals: () => getProduct(PASHOYA).images[1],
   oils: () => getProduct(PASHOYA).highlights[1].image,
   herbs: () => getProduct('cystorita-syrup').images[2],
-  skin: () => getProduct('haldi-chandan-hand-made-soap-1').images[2],
+  skin: () => getProduct('haldi-chandan-hand-made-soap').images[2],
 }
 
 export default function Ingredients() {

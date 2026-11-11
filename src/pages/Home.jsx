@@ -7,7 +7,7 @@ import ProductCard from '../components/ProductCard'
 import ReelStrip from '../components/ReelStrip'
 import Icon from '../components/Icon'
 
-const PASHOYA = 'pashoya-pain-salt-joint-support-amp-amp-amp-amp-natural-body-detox-salt-250-g-'
+const PASHOYA = 'pashoya-pain-salt'
 
 export default function Home() {
   const root = useRef(null)
@@ -18,7 +18,7 @@ export default function Home() {
   const pashoya = getProduct(PASHOYA)
   const neem = getProduct('neem-hand-made-soap')
   const syrup = getProduct('cystorita-syrup')
-  const haldi = getProduct('haldi-chandan-hand-made-soap-1')
+  const haldi = getProduct('haldi-chandan-hand-made-soap')
 
   useReveal(root)
 

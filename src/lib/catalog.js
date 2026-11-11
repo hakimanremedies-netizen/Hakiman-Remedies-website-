@@ -29,7 +29,11 @@ const sameHandle = (a, b) => a.replace(/^-+|-+$/g, '') === b.replace(/^-+|-+$/g,
 // (highlights, features, ingredients, design images) stays in products.json,
 // matched by handle, until it is moved to metafields.
 function fromShopify(sp) {
-  const local = products.find((p) => sameHandle(p.handle, sp.handle))
+  // By handle, falling back to SKU so a handle renamed in Shopify still finds its content.
+  const sku = sp.variants.nodes[0]?.sku
+  const local =
+    products.find((p) => sameHandle(p.handle, sp.handle)) ||
+    (sku ? products.find((p) => p.variants.some((v) => v.sku === sku)) : undefined)
   const variants = sp.variants.nodes.map((v) => ({
     id: v.id,
     title: v.title,

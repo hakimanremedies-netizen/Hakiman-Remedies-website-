@@ -282,7 +282,7 @@
   {
     "id": "hk-13",
     "sourceId": 13,
-    "handle": "hakiman-fizoliv-ds-syrup-sugar-free-ayurvedic-liver-amp-amp-amp-digestive-care",
+    "handle": "fizoliv-ds-syrup",
     "title": "Fizoliv DS Syrup",
     "description": [
       "Fizoliv DS Syrup is an Ayurvedic herbal formulation designed to provide natural support for healthy liver function and digestive wellness. The product features a herbal-based formula and is presented as a no-added-sugar syrup. Suitable for those looking to include traditional Ayurvedic care as part of their wellness routine."
@@ -339,7 +339,7 @@
     "precautions": null,
     "faqs": [],
     "reviews": [],
-    "sourceUrl": "https://thehakiman.com/product.php?slug=hakiman-fizoliv-ds-syrup-sugar-free-ayurvedic-liver-amp-amp-amp-digestive-care",
+    "sourceUrl": "https://thehakiman.com/product.php?slug=fizoliv-ds-syrup",
     "sourceMaxOrderQty": 100,
     "availability": "in_stock",
     "isDemo": false
@@ -347,7 +347,7 @@
   {
     "id": "hk-24",
     "sourceId": 24,
-    "handle": "haldi-chandan-hand-made-soap-1",
+    "handle": "haldi-chandan-hand-made-soap",
     "title": "Haldi Chandan Hand Made Soap",
     "description": [
       "The Hakiman Haldi Chandan Hand Made Soap brings the traditional goodness of Ayurveda into your everyday bathing routine.",
@@ -408,7 +408,7 @@
     "precautions": null,
     "faqs": [],
     "reviews": [],
-    "sourceUrl": "https://thehakiman.com/product.php?slug=haldi-chandan-hand-made-soap-1",
+    "sourceUrl": "https://thehakiman.com/product.php?slug=haldi-chandan-hand-made-soap",
     "sourceMaxOrderQty": 100,
     "availability": "in_stock",
     "isDemo": false
@@ -490,7 +490,7 @@
   {
     "id": "hk-11",
     "sourceId": 11,
-    "handle": "pashoya-pain-salt-joint-support-amp-amp-amp-amp-natural-body-detox-salt-250-g-",
+    "handle": "pashoya-pain-salt",
     "title": "PASHOYA Pain Salt – Joint Support & Natural Body Detox Salt",
     "description": [
       "Hakiman PASHOYA Pain Salt is a mineral-rich bath and foot soak blend designed to turn everyday bathing into a relaxing self-care experience. Its carefully selected combination of Epsom Salt, Sajji Khar, Bhind Salt, Java Khar and refreshing essential oils creates a soothing soak for tired feet and muscles.",
@@ -571,7 +571,7 @@
     "precautions": null,
     "faqs": [],
     "reviews": [],
-    "sourceUrl": "https://thehakiman.com/product.php?slug=pashoya-pain-salt-joint-support-amp-amp-amp-amp-natural-body-detox-salt-250-g-",
+    "sourceUrl": "https://thehakiman.com/product.php?slug=pashoya-pain-salt",
     "sourceMaxOrderQty": 85,
     "availability": "in_stock",
     "isDemo": false

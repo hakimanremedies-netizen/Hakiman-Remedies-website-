@@ -5,25 +5,112 @@
   "outputDirectory": "dist",
   "redirects": [
     {
+      "source": "/products/pashoya-pain-salt-joint-support-amp-amp-amp-amp-natural-body-detox-salt-250-g",
+      "destination": "/products/pashoya-pain-salt",
+      "permanent": true
+    },
+    {
+      "source": "/products/pashoya-pain-salt-joint-support-amp-amp-amp-amp-natural-body-detox-salt-250-g-",
+      "destination": "/products/pashoya-pain-salt",
+      "permanent": true
+    },
+    {
+      "source": "/products/hakiman-fizoliv-ds-syrup-sugar-free-ayurvedic-liver-amp-amp-amp-digestive-care",
+      "destination": "/products/fizoliv-ds-syrup",
+      "permanent": true
+    },
+    {
+      "source": "/products/haldi-chandan-hand-made-soap-1",
+      "destination": "/products/haldi-chandan-hand-made-soap",
+      "permanent": true
+    },
+    {
       "source": "/product.php",
-      "has": [{ "type": "query", "key": "slug", "value": "(?<slug>.+)" }],
+      "has": [
+        {
+          "type": "query",
+          "key": "slug",
+          "value": "(?<slug>.+)"
+        }
+      ],
       "destination": "/products/:slug",
       "permanent": true
     },
-    { "source": "/product.php", "destination": "/shop", "permanent": true },
-    { "source": "/index.php", "destination": "/", "permanent": true },
-    { "source": "/shop.php", "destination": "/shop", "permanent": true },
-    { "source": "/category.php", "destination": "/shop", "permanent": true },
-    { "source": "/about.php", "destination": "/our-story", "permanent": true },
-    { "source": "/contact.php", "destination": "/contact", "permanent": true },
-    { "source": "/blog.php", "destination": "/learn", "permanent": true },
-    { "source": "/faq.php", "destination": "/contact", "permanent": true },
-    { "source": "/shipping-policy.php", "destination": "/policies/shipping", "permanent": true },
-    { "source": "/refund-policy.php", "destination": "/policies/refunds", "permanent": true },
-    { "source": "/privacy-policy.php", "destination": "/policies/privacy", "permanent": true },
-    { "source": "/terms-and-conditions.php", "destination": "/policies/terms", "permanent": true },
-    { "source": "/(login|my-account|wishlist).php", "destination": "/account", "permanent": true },
-    { "source": "/cart.php", "destination": "/checkout", "permanent": true }
+    {
+      "source": "/product.php",
+      "destination": "/shop",
+      "permanent": true
+    },
+    {
+      "source": "/index.php",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/shop.php",
+      "destination": "/shop",
+      "permanent": true
+    },
+    {
+      "source": "/category.php",
+      "destination": "/shop",
+      "permanent": true
+    },
+    {
+      "source": "/about.php",
+      "destination": "/our-story",
+      "permanent": true
+    },
+    {
+      "source": "/contact.php",
+      "destination": "/contact",
+      "permanent": true
+    },
+    {
+      "source": "/blog.php",
+      "destination": "/learn",
+      "permanent": true
+    },
+    {
+      "source": "/faq.php",
+      "destination": "/contact",
+      "permanent": true
+    },
+    {
+      "source": "/shipping-policy.php",
+      "destination": "/policies/shipping",
+      "permanent": true
+    },
+    {
+      "source": "/refund-policy.php",
+      "destination": "/policies/refunds",
+      "permanent": true
+    },
+    {
+      "source": "/privacy-policy.php",
+      "destination": "/policies/privacy",
+      "permanent": true
+    },
+    {
+      "source": "/terms-and-conditions.php",
+      "destination": "/policies/terms",
+      "permanent": true
+    },
+    {
+      "source": "/(login|my-account|wishlist).php",
+      "destination": "/account",
+      "permanent": true
+    },
+    {
+      "source": "/cart.php",
+      "destination": "/checkout",
+      "permanent": true
+    }
   ],
-  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
 }

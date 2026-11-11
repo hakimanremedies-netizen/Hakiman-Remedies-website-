@@ -5,7 +5,7 @@ import { formatPrice, getCategories, getProduct, getProducts, shortTitle } from 
 import { useReveal } from '../lib/motion'
 import Icon from '../components/Icon'
 
-const PASHOYA = 'pashoya-pain-salt-joint-support-amp-amp-amp-amp-natural-body-detox-salt-250-g-'
+const PASHOYA = 'pashoya-pain-salt'
 
 export default function Learn() {
   const root = useRef(null)

@@ -35,7 +35,7 @@ export const journal = [
     cover: null,
     excerpt: null,
     body: null,
-    products: ['neem-hand-made-soap', 'haldi-chandan-hand-made-soap-1', 'de-tan-hand-made-soap'],
+    products: ['neem-hand-made-soap', 'haldi-chandan-hand-made-soap', 'de-tan-hand-made-soap'],
     approvedBy: null,
   },
 ]

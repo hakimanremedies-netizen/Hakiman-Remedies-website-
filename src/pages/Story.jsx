@@ -8,7 +8,7 @@ import Icon from '../components/Icon'
 export default function Story() {
   const root = useRef(null)
   useReveal(root)
-  const haldi = getProduct('haldi-chandan-hand-made-soap-1')
+  const haldi = getProduct('haldi-chandan-hand-made-soap')
   const neem = getProduct('neem-hand-made-soap')
 
   return (
