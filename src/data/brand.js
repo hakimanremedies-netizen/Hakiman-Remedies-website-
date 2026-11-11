@@ -72,7 +72,7 @@ export const contactCopy = {
 // Facts restated from the published shipping & refund policies (see policies.json).
 export const serviceFacts = [
   { label: 'Ships across India', text: 'All states and union territories within India.' },
-  { label: 'Dispatch in 2–3 business days', text: 'Delivery in approximately 5–7 business days, depending on location.' },
+  { label: 'Dispatch in 2–3 business days', text: 'Delivery in approximately 3–5 business days, depending on location.' },
   { label: '7-day reporting window', text: 'For damaged, incorrect or undelivered orders, with photographic evidence.' },
   { label: 'Secure third-party payments', text: 'Card and UPI details are never stored on Hakiman servers.' },
 ]

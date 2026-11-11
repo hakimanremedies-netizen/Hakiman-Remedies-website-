@@ -234,14 +234,14 @@ function Delivery({ soldOut }) {
   const [msg, setMsg] = useState('')
   const check = () => {
     setMsg(/^\d{6}$/.test(pin.trim())
-      ? 'We deliver across India — dispatched in 2–3 business days, usually with you in 5–7.'
+      ? 'We deliver across India — dispatched in 2–3 business days, usually with you in 3–5.'
       : 'Please enter a 6-digit pincode.')
   }
   return (
     <div style={sx('display: flex; flex-direction: column; gap: 10px; padding: 16px 18px; border-radius: 14px; background: #FFFFFF; border: 1px solid #EAD6C0')}>
       <div style={sx('display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 600')}>
         <span aria-hidden="true" style={sx(`width: 9px; height: 9px; border-radius: 50%; background: ${soldOut ? '#A3321F' : '#2F7A4B'}`)} />
-        {soldOut ? 'Out of stock right now' : 'In stock · Dispatched in 2–3 business days, delivered in 5–7'}
+        {soldOut ? 'Out of stock right now' : 'In stock · Dispatched in 2–3 business days, delivered in 3–5'}
       </div>
       <form onSubmit={(e) => { e.preventDefault(); check() }} style={sx('display: flex; gap: 8px; flex-wrap: wrap; align-items: flex-end; margin: 0')}>
         <label style={sx('display: flex; flex-direction: column; gap: 4px; font-size: 12px; font-weight: 700; color: #6A5244; flex: 1 1 160px')}>Check delivery to your pincode

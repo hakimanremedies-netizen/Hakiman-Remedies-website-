@@ -49,7 +49,7 @@ const pashoyaDraft = {
   },
   defaultPack: '2 Jars',
   trust: ['Lab tested', 'Secure checkout', '[Cash on delivery]'],
-  trustMobile: ['Lab tested', 'Ships in 2–3 days', '[COD]'],
+  trustMobile: ['Lab tested', 'Ships in 2–3 days', 'Cash on delivery'],
   accordions: [
     { title: "What's inside", body: ['Epsom salt, Sajji khar, Bhind salt and Java khar, infused with eucalyptus, mint, lavender, bergamot, orange and lemongrass essential oils. No colours, no synthetic fragrance.'] },
     { title: 'How to use', body: ['Add 2–4 tablespoons to a basin or tub of warm water. Soak your feet or body for 15–20 minutes. Pat dry and rest. For external use only.'] },
@@ -153,7 +153,7 @@ const pashoyaDraft = {
     { q: 'Can I use it in a bucket bath instead of a basin?', a: 'Yes. Dissolve 4 tablespoons in a bucket of warm water and use it for your bath, or soak your whole body in a tub for 15–20 minutes.' },
     { q: 'Is it safe if I have diabetes?', a: 'Many diabetic feet have reduced feeling, so always test the water with your hand and keep it warm, not hot. Skip it on cuts or cracks and check with your doctor first.' },
     { q: 'Can I use it during pregnancy?', a: 'Please ask your doctor before using any bath salt or essential oils during pregnancy.' },
-    { q: 'When will my order arrive?', a: 'Orders are dispatched in 2–3 business days and delivered in 5–7 days, anywhere in India.' },
+    { q: 'When will my order arrive?', a: 'Orders are dispatched in 2–3 business days and delivered in 3–5 days, anywhere in India.' },
     { q: 'Is cash on delivery available?', a: 'Yes. Cash on delivery is available on orders across India, or you can pay online with UPI, cards, net banking or wallets.' },
     { q: 'Can I cancel my order?', a: 'Yes, any time before it is dispatched. Call or WhatsApp us with your order number; prepaid orders are refunded in full within 7–10 business days.' },
     { q: 'What if my jar arrives damaged?', a: 'Message us within 7 days of delivery with a photo and we’ll refund to your original payment method within 7–10 business days.' },
@@ -199,11 +199,11 @@ export const pashoya = publishable(pashoyaDraft)
 // Shown on every product page; restated from the published shipping and refund policies.
 export const shippingAccordion = {
   title: 'Shipping & returns',
-  body: ['Ships to every state in India. Dispatched in 2–3 business days, delivered in 5–7. Damaged or wrong item? Tell us within 7 days of delivery with a photo and we\'ll refund to your original payment method.'],
+  body: ['Ships to every state in India. Dispatched in 2–3 business days, delivered in 3–5. Damaged or wrong item? Tell us within 7 days of delivery with a photo and we\'ll refund to your original payment method.'],
 }
 
 const storeFaqsDraft = [
-  { q: 'When will my order arrive?', a: 'Orders are dispatched in 2–3 business days and delivered in 5–7 days, anywhere in India.' },
+  { q: 'When will my order arrive?', a: 'Orders are dispatched in 2–3 business days and delivered in 3–5 days, anywhere in India.' },
   { q: 'Is cash on delivery available?', a: 'Yes. Cash on delivery is available on orders across India, or you can pay online with UPI, cards, net banking or wallets.' },
   { q: 'Can I cancel my order?', a: 'Yes, any time before it is dispatched. Call or WhatsApp us with your order number; prepaid orders are refunded in full within 7–10 business days.' },
   { q: 'What if my order arrives damaged?', a: 'Message us within 7 days of delivery with a photo and we’ll refund to your original payment method within 7–10 business days.' },
