@@ -35,7 +35,7 @@ const PRODUCTS_QUERY = `
         variants(first: 50) {
           nodes {
             id title sku availableForSale
-            quantityAvailable
+            quantityAvailable currentlyNotInStock
             price { amount currencyCode }
             compareAtPrice { amount }
           }

@@ -154,7 +154,8 @@ const pashoyaDraft = {
     { q: 'Is it safe if I have diabetes?', a: 'Many diabetic feet have reduced feeling, so always test the water with your hand and keep it warm, not hot. Skip it on cuts or cracks and check with your doctor first.' },
     { q: 'Can I use it during pregnancy?', a: 'Please ask your doctor before using any bath salt or essential oils during pregnancy.' },
     { q: 'When will my order arrive?', a: 'Orders are dispatched in 2–3 business days and delivered in 5–7 days, anywhere in India.' },
-    { q: 'Is cash on delivery available?', a: '[Confirm COD availability and any charges.]' },
+    { q: 'Is cash on delivery available?', a: 'Yes. Cash on delivery is available on orders across India, or you can pay online with UPI, cards, net banking or wallets.' },
+    { q: 'Can I cancel my order?', a: 'Yes, any time before it is dispatched. Call or WhatsApp us with your order number; prepaid orders are refunded in full within 7–10 business days.' },
     { q: 'What if my jar arrives damaged?', a: 'Message us within 7 days of delivery with a photo and we’ll refund to your original payment method within 7–10 business days.' },
   ],
   final: {
@@ -203,7 +204,8 @@ export const shippingAccordion = {
 
 const storeFaqsDraft = [
   { q: 'When will my order arrive?', a: 'Orders are dispatched in 2–3 business days and delivered in 5–7 days, anywhere in India.' },
-  { q: 'Is cash on delivery available?', a: '[Confirm COD availability and any charges.]' },
+  { q: 'Is cash on delivery available?', a: 'Yes. Cash on delivery is available on orders across India, or you can pay online with UPI, cards, net banking or wallets.' },
+  { q: 'Can I cancel my order?', a: 'Yes, any time before it is dispatched. Call or WhatsApp us with your order number; prepaid orders are refunded in full within 7–10 business days.' },
   { q: 'What if my order arrives damaged?', a: 'Message us within 7 days of delivery with a photo and we’ll refund to your original payment method within 7–10 business days.' },
 ]
 

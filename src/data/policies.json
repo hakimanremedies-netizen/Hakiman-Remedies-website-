@@ -42,8 +42,8 @@
     "key": "refunds",
     "eyebrow": "Orders & Support",
     "title": "Payment, Refund & Returns Policy",
-    "intro": "Please review our payment, refund, and return guidelines carefully before making a purchase.",
-    "updated": "Last Updated: July 30, 2026",
+    "intro": "Please review our payment, cancellation, refund, and return guidelines carefully before making a purchase.",
+    "updated": "Last Updated: November 11, 2026",
     "sections": [
       {
         "heading": "1. Payments & Security",
@@ -61,7 +61,16 @@
         ]
       },
       {
-        "heading": "3. Returns & Hygiene Protocol",
+        "heading": "3. Order Cancellation",
+        "paragraphs": [
+          "You can cancel your order at any time before it is dispatched:",
+          "How to Cancel: Call or WhatsApp us on +91 8881116681, or email hakimanremedies@gmail.com, with your order number.",
+          "Refund on Cancellation: Prepaid orders cancelled before dispatch are refunded in full to the original payment method within 7–10 business days. Cash on delivery orders are simply cancelled, with nothing to pay.",
+          "After Dispatch: Once your order has been dispatched it can no longer be cancelled. Our refund and return terms below still apply."
+        ]
+      },
+      {
+        "heading": "4. Returns & Hygiene Protocol",
         "paragraphs": [
           "Due to the natural, health-focused, and perishable nature of our herbal formulations, we maintain a strict returns protocol to ensure safety and hygiene for all our patrons:",
           "Eligibility: To be eligible for a return, products must be entirely unused, unopened, and in their original packaging with all factory seals intact.",
@@ -70,7 +79,7 @@
         ]
       },
       {
-        "heading": "4. Shipping & Delivery Timeline",
+        "heading": "5. Shipping & Delivery Timeline",
         "paragraphs": [
           "We are committed to making holistic wellness accessible to every household across India:",
           "Coverage: Our logistical network currently supports secure shipping exclusively to all states and union territories within India.",
@@ -79,7 +88,7 @@
         ]
       },
       {
-        "heading": "5. Customer Care & Support",
+        "heading": "6. Customer Care & Support",
         "paragraphs": [
           "If you have any questions about a refund, wish to initiate a return, or require assistance with your order, please reach out to our team:",
           "Phone / WhatsApp: +91 8881116681",

@@ -14,8 +14,9 @@ let catalog = sortBySource(products)
 let live = false
 let settings = { freeShippingThreshold: null }
 
-// Caps the quantity stepper when Shopify doesn't report a stock count (untracked
-// inventory); Shopify still enforces real stock at checkout.
+// Caps the quantity stepper. The store keeps selling past zero stock, so the
+// tracked count isn't a cap; Shopify still enforces stock at checkout for any
+// product set to stop selling when out of stock.
 const LIVE_MAX_QTY = 10
 // A tracked variant at or below this count shows the "Only N left" notice.
 export const LOW_STOCK_AT = 10
@@ -43,6 +44,8 @@ function fromShopify(sp) {
     available: v.availableForSale,
     // null when inventory isn't tracked (or the storefront can't read it)
     quantity: v.quantityAvailable ?? null,
+    // out of stock but still orderable (Shopify "continue selling when out of stock")
+    backorder: Boolean(v.currentlyNotInStock),
   }))
   const base = local || {
     id: sp.id,
@@ -136,14 +139,14 @@ export function searchProducts(query) {
   )
 }
 
-// Live: the variant's Shopify stock (or a cap when untracked). Otherwise demo-only
-// stock, kept apart from the real catalog fields.
+// Live: the quantity cap for an orderable variant, 0 when Shopify won't sell it.
+// Otherwise demo-only stock, kept apart from the real catalog fields.
 export function getStock(id, variantId) {
   if (!live) return inventory.stock[id] ?? 0
   const p = getProductById(id)
   const v = p?.variants.find((x) => x.id === variantId) || p?.variants[0]
   if (!v?.available) return 0
-  return v.quantity > 0 ? Math.min(v.quantity, LIVE_MAX_QTY) : LIVE_MAX_QTY
+  return LIVE_MAX_QTY
 }
 
 // "Only N left" count, only when Shopify reports genuinely low tracked stock.

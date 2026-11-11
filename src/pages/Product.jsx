@@ -290,9 +290,17 @@ function SaleTimer({ ends, onEnd, m }) {
   )
 }
 
-// Shown only when Shopify reports a tracked stock count at or below LOW_STOCK_AT.
+// Shown only when Shopify reports a tracked stock count at or below LOW_STOCK_AT,
+// or that the variant is out of stock but still orderable.
 function StockNotice({ variant, m }) {
   const left = lowStock(variant)
+  if (variant?.backorder) {
+    return (
+      <div style={sx(`font-size: ${m ? '13px' : '14px'}; font-weight: 700; color: #6B4A33`)}>
+        Out of stock right now. You can still order; it ships as soon as it's restocked.
+      </div>
+    )
+  }
   if (!left) return null
   return (
     <div style={sx('display: flex; flex-direction: column; gap: 6px')}>
