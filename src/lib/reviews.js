@@ -27,3 +27,25 @@ export async function fetchReviews(handle) {
   })).filter((r) => r.rating && (r.head || r.body))
   return { count, average, reviews }
 }
+
+// Sends a review to Judge.me's public review form (no token). Judge.me holds it for
+// moderation, so it only shows on the site once it is published there.
+export async function submitReview(shopifyId, { name, email, rating, title, body }) {
+  if (!SHOP || !shopifyId) throw new Error('Reviews are not available right now.')
+  // Form-encoded so the browser sends it without a CORS preflight (Judge.me has none).
+  const form = new URLSearchParams({
+    shop_domain: SHOP,
+    platform: 'shopify',
+    id: String(shopifyId).split('/').pop(),
+    name,
+    email,
+    rating: String(rating),
+    title,
+    body,
+  })
+  const res = await fetch('https://judge.me/api/v1/reviews', { method: 'POST', body: form })
+  if (!res.ok) {
+    const { message } = await res.json().catch(() => ({}))
+    throw new Error(message || 'Could not send your review. Please try again.')
+  }
+}

@@ -3,7 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { CATEGORY_INFO, LOW_STOCK_AT, activeSaleEnd, discount, formatPrice, getProduct, getProductById, getRelated, getStock, isLive, lowStock, saleExpired, shortTitle, summary } from '../lib/catalog'
 import { track } from '../lib/analytics'
 import { fetchComplementaryHandles } from '../lib/shopify'
-import { fetchReviews } from '../lib/reviews'
+import { fetchReviews, submitReview } from '../lib/reviews'
 import { useProductSeo } from '../lib/seo'
 import { useCart } from '../lib/cart'
 import { sx } from '../lib/sx'
@@ -798,7 +798,70 @@ function Heritage({ page, m }) {
   )
 }
 
-function Reviews({ page, m }) {
+const fieldStyle = 'width: 100%; box-sizing: border-box; padding: 12px 14px; border: 1px solid #E2C8AC; border-radius: 12px; background: #FFFFFF; font: inherit; font-size: 15px; color: #2B1A11'
+const labelStyle = 'display: flex; flex-direction: column; gap: 6px; font-size: 14px; font-weight: 700'
+
+function ReviewForm({ page, shopifyId, m, onClose }) {
+  const [rating, setRating] = useState(0)
+  const [status, setStatus] = useState('idle')
+  const [error, setError] = useState('')
+
+  async function onSubmit(e) {
+    e.preventDefault()
+    if (!rating) return setError('Please choose a star rating.')
+    const f = new FormData(e.currentTarget)
+    setStatus('sending')
+    setError('')
+    try {
+      await submitReview(shopifyId, {
+        name: f.get('name').trim(),
+        email: f.get('email').trim(),
+        rating,
+        title: f.get('title').trim(),
+        body: f.get('body').trim(),
+      })
+      setStatus('sent')
+    } catch (err) {
+      setStatus('idle')
+      setError(err.message)
+    }
+  }
+
+  const box = `background: #FBF5EC; border: 1px solid #EAD6C0; border-radius: 18px; padding: ${m ? '20px 16px' : '32px'}; margin-bottom: ${m ? '20px' : '32px'}`
+  if (status === 'sent') {
+    return (
+      <div role="status" style={sx(`${box}; text-align: center`)}>
+        <h3 style={sx('margin: 0 0 8px; font-size: 20px; font-weight: 800')}>Thank you for your review</h3>
+        <p style={sx('margin: 0; font-size: 15px; line-height: 1.6; color: #6A5244')}>We check every review before it goes live, so it will show here shortly.</p>
+      </div>
+    )
+  }
+  return (
+    <form onSubmit={onSubmit} style={sx(`${box}; display: grid; gap: 16px; grid-template-columns: ${m ? '1fr' : '1fr 1fr'}`)}>
+      <fieldset style={sx('grid-column: 1 / -1; border: 0; margin: 0; padding: 0')}>
+        <legend style={sx('font-size: 14px; font-weight: 700; margin-bottom: 6px')}>Your rating for {page.name}</legend>
+        <div style={sx('display: flex; gap: 4px')}>
+          {[1, 2, 3, 4, 5].map((n) => (
+            <button key={n} type="button" onClick={() => setRating(n)} aria-label={`${n} star${n > 1 ? 's' : ''}`} aria-pressed={rating === n} style={sx(`background: none; border: 0; padding: 4px; cursor: pointer; font-size: 30px; line-height: 1; color: ${n <= rating ? '#D9822B' : '#E2C8AC'}`)}>★</button>
+          ))}
+        </div>
+      </fieldset>
+      <label style={sx(labelStyle)}>Name<input name="name" required maxLength={60} autoComplete="name" style={sx(fieldStyle)} /></label>
+      <label style={sx(labelStyle)}>Email (not shown)<input name="email" type="email" required autoComplete="email" style={sx(fieldStyle)} /></label>
+      <label style={sx(`${labelStyle}; grid-column: 1 / -1`)}>Review title<input name="title" required maxLength={100} style={sx(fieldStyle)} /></label>
+      <label style={sx(`${labelStyle}; grid-column: 1 / -1`)}>Your review<textarea name="body" required rows={5} maxLength={5000} style={sx(`${fieldStyle}; resize: vertical`)} /></label>
+      {error && <p role="alert" style={sx('grid-column: 1 / -1; margin: 0; font-size: 14px; color: #B3261E')}>{error}</p>}
+      <div style={sx('grid-column: 1 / -1; display: flex; gap: 12px; flex-wrap: wrap')}>
+        <button type="submit" disabled={status === 'sending'} style={sx(`height: 48px; padding: 0 24px; border: 0; border-radius: 12px; background: ${CTA}; color: #FFFFFF; font-weight: 800; font-size: 15px; cursor: pointer; opacity: ${status === 'sending' ? 0.6 : 1}`)}>{status === 'sending' ? 'Sending…' : 'Submit review'}</button>
+        <button type="button" onClick={onClose} style={sx('height: 48px; padding: 0 20px; border: 0; background: none; color: #6A5244; font-weight: 700; font-size: 15px; cursor: pointer')}>Cancel</button>
+      </div>
+    </form>
+  )
+}
+
+function Reviews({ page, shopifyId, m }) {
+  const [writing, setWriting] = useState(false)
+  const reviews = page.reviews || []
   return (
     <section id="reviews" style={sx('background: #FFFFFF; border-top: 1px solid #EAD6C0')}>
       <div style={sx(`max-width: 1280px; margin: 0 auto; padding: ${sectionPad(m, '88px 24px')}`)}>
@@ -814,17 +877,22 @@ function Reviews({ page, m }) {
                 <div><div aria-hidden="true" style={sx('color: #D9822B; letter-spacing: 3px; font-size: 18px')}>{page.reviewStars || '★★★★★'}</div><div style={sx('font-size: 14px; color: #6A5244')}>{page.reviewCount}</div></div>
               </>
             )}
-            <a href={whatsappHref(`Hi Hakiman, I'd like to share a review of ${page.name}.`)} target="_blank" rel="noreferrer" style={sx('display: inline-flex; align-items: center; height: 48px; box-sizing: border-box; padding: 0 20px; border-radius: 12px; border: 2px solid #2B1A11; background: #FFFFFF; font-weight: 800; font-size: 14px; cursor: pointer; color: #2B1A11; text-decoration: none')}>Write a review</a>
+            {shopifyId && !writing && (
+              <button type="button" onClick={() => setWriting(true)} style={sx('display: inline-flex; align-items: center; height: 48px; box-sizing: border-box; padding: 0 20px; border-radius: 12px; border: 2px solid #2B1A11; background: #FFFFFF; font-weight: 800; font-size: 14px; cursor: pointer; color: #2B1A11')}>Write a review</button>
+            )}
           </div>
         </div>
-        {page.reviews.length === 0 ? (
-          <div style={sx(`border: 1px dashed #E2C8AC; border-radius: 18px; padding: ${m ? '28px 18px' : '40px'}; text-align: center; background: #FBF5EC`)}>
-            <h3 style={sx(`margin: 0 0 8px; font-size: ${m ? '18px' : '20px'}; font-weight: 800`)}>No reviews yet</h3>
-            <p style={sx('margin: 0 auto; max-width: 480px; font-size: 15px; line-height: 1.6; color: #6A5244')}>Tried {page.name}? Tell us how your soak went — your review helps the next family decide.</p>
-          </div>
+        {writing && <ReviewForm page={page} shopifyId={shopifyId} m={m} onClose={() => setWriting(false)} />}
+        {reviews.length === 0 ? (
+          !writing && (
+            <div style={sx(`border: 1px dashed #E2C8AC; border-radius: 18px; padding: ${m ? '28px 18px' : '40px'}; text-align: center; background: #FBF5EC`)}>
+              <h3 style={sx(`margin: 0 0 8px; font-size: ${m ? '18px' : '20px'}; font-weight: 800`)}>No reviews yet</h3>
+              <p style={sx('margin: 0 auto; max-width: 480px; font-size: 15px; line-height: 1.6; color: #6A5244')}>Tried {page.name}? {page.featured ? 'Tell us how your soak went' : 'Tell us how it worked for you'} — your review helps the next family decide.</p>
+            </div>
+          )
         ) : (
           <div style={sx('display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px')}>
-            {page.reviews.map((rv) => (
+            {reviews.map((rv) => (
               <article key={rv.id || rv.head} style={sx('background: #FBF5EC; border: 1px solid #EAD6C0; border-radius: 18px; padding: 24px; display: flex; flex-direction: column; gap: 12px')}>
                 <div role="img" aria-label={`${rv.rating || 5} out of 5 stars`} style={sx('color: #D9822B; letter-spacing: 2px')}>{stars(rv.rating || 5)}</div>
                 <h3 style={sx('margin: 0; font-size: 17px; font-weight: 800; line-height: 1.35')}>{rv.head}</h3>
@@ -1110,14 +1178,14 @@ function ProductPage({ product }) {
                 <Ingredients page={page} m />
                 <Compare page={page} m />
                 <Heritage page={page} m />
-                <Reviews page={page} m />
+                <Reviews page={page} shopifyId={product.shopifyId} m />
               </>
             ) : (
               <>
                 <div style={sx('padding: 28px 16px 0')}><Accordions items={page.accordions} m /></div>
                 <BenefitStrip page={page} m />
                 <Highlights page={page} m />
-                {page.reviews?.length > 0 && <Reviews page={page} m />}
+                <Reviews page={page} shopifyId={product.shopifyId} m />
               </>
             )}
             <Faq page={page} m />
@@ -1136,12 +1204,12 @@ function ProductPage({ product }) {
                 <HowToUse page={page} />
                 <Compare page={page} />
                 <Heritage page={page} />
-                <Reviews page={page} />
+                <Reviews page={page} shopifyId={product.shopifyId} />
               </>
             ) : (
               <>
                 <Highlights page={page} />
-                {page.reviews?.length > 0 && <Reviews page={page} />}
+                <Reviews page={page} shopifyId={product.shopifyId} />
               </>
             )}
             <Faq page={page} />
