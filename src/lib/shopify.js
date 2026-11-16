@@ -9,12 +9,30 @@ export const shopifyEnabled = Boolean(DOMAIN && TOKEN)
 // Shopify-hosted customer accounts (email one-time-code sign-in, orders, addresses).
 export const accountUrl = `https://${DOMAIN}/account`
 
-async function storefront(query, variables = {}, { allowDenied = false } = {}) {
-  const res = await fetch(`https://${DOMAIN}/api/${API_VERSION}/graphql.json`, {
+// Requests go through our same-origin Storefront API proxy (api/shopify.js), so Shopify
+// sets its analytics and session cookies on thehakiman.com. Where the proxy isn't
+// running (e.g. `vite preview`), it falls back to calling Shopify directly.
+const PATH = `/api/${API_VERSION}/graphql.json`
+let useProxy = true
+
+function post(url, body) {
+  return fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'X-Shopify-Storefront-Access-Token': TOKEN },
-    body: JSON.stringify({ query, variables }),
+    body,
   })
+}
+
+const isJson = (res) => Boolean(res?.headers.get('content-type')?.includes('json'))
+
+async function storefront(query, variables = {}, { allowDenied = false } = {}) {
+  const body = JSON.stringify({ query, variables })
+  let res = useProxy ? await post(PATH, body).catch(() => null) : null
+  if (!res?.ok || !isJson(res)) {
+    // An HTML answer means there is no proxy here at all; a failed one may be transient.
+    if (res && !isJson(res)) useProxy = false
+    res = await post(`https://${DOMAIN}${PATH}`, body)
+  }
   if (!res.ok) throw new Error(`Shopify Storefront API ${res.status}`)
   const { data, errors } = await res.json()
   // ACCESS_DENIED only nulls the denied field; the rest of the data is still usable.

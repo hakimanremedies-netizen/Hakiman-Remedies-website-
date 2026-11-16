@@ -115,6 +115,10 @@ export function getProductById(id) {
   return catalog.find((p) => p.id === id) || null
 }
 
+export function getProductByVariant(variantId) {
+  return catalog.find((p) => p.variants.some((v) => v.id === variantId)) || null
+}
+
 export function getCategories() {
   const counts = {}
   for (const p of catalog) counts[p.category] = (counts[p.category] || 0) + 1

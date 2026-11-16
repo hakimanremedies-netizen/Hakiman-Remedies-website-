@@ -1,6 +1,7 @@
-import { useMemo, useRef } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { getCategories, getProducts, searchProducts } from '../lib/catalog'
+import { trackSearch } from '../lib/analytics'
 import { useReveal } from '../lib/motion'
 import ProductCard from '../components/ProductCard'
 import Icon from '../components/Icon'
@@ -35,6 +36,13 @@ export default function Shop() {
   }
 
   useReveal(root, [category, sort, q])
+
+  // Search viewed, once typing pauses.
+  useEffect(() => {
+    if (!q.trim()) return
+    const t = setTimeout(() => trackSearch(q.trim(), list.length), 800)
+    return () => clearTimeout(t)
+  }, [q, list.length])
 
   return (
     <div ref={root} className="page">

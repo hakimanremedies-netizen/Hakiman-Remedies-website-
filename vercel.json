@@ -103,11 +103,25 @@
     },
     {
       "source": "/cart.php",
-      "destination": "/checkout",
+      "destination": "/cart",
       "permanent": true
     }
   ],
+  "headers": [
+    {
+      "source": "/(api|__shopify|checkout)(.*)",
+      "headers": [{ "key": "X-Robots-Tag", "value": "noindex" }]
+    }
+  ],
   "rewrites": [
+    { "source": "/api/:path*", "destination": "/api/shopify?__p=/api/:path*" },
+    { "source": "/__shopify/:path*", "destination": "/api/shopify?__p=/__shopify/:path*" },
+    { "source": "/checkout", "destination": "/api/shopify?__p=/checkout" },
+    { "source": "/cart/:path+", "destination": "/api/shopify?__p=/cart/:path+" },
+    { "source": "/cart.js", "destination": "/api/shopify?__p=/cart.js" },
+    { "source": "/cart.json", "destination": "/api/shopify?__p=/cart.json" },
+    { "source": "/.well-known/ucp", "destination": "/api/shopify?__p=/.well-known/ucp" },
+    { "source": "/.well-known/shopify/:path*", "destination": "/api/shopify?__p=/.well-known/shopify/:path*" },
     {
       "source": "/(.*)",
       "destination": "/index.html"

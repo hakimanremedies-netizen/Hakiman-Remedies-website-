@@ -19,7 +19,7 @@ import { trackPageView } from './lib/analytics'
 import WhatsAppButton from './components/WhatsAppButton'
 
 function ScrollToTop() {
-  const { pathname } = useLocation()
+  const { pathname, search } = useLocation()
   // Layout effect so the new page never paints at the old scroll position.
   useLayoutEffect(() => {
     // ScrollTrigger remembers the last page's scroll and restores it on
@@ -34,10 +34,11 @@ function ScrollToTop() {
     })
     return () => cancelAnimationFrame(frame)
   }, [pathname])
-  // After paint so the page has set its own document.title.
+  // After paint so the page has set its own document.title. Query changes (shop
+  // filters, search) count as page views too, as on a Shopify theme.
   useEffect(() => {
     trackPageView(pathname)
-  }, [pathname])
+  }, [pathname, search])
   return null
 }
 
@@ -60,7 +61,8 @@ export default function App() {
           <Route path="/learn" element={<Learn />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/policies/:key" element={<Policy />} />
-          <Route path="/checkout" element={<Checkout />} />
+          {/* /checkout itself is served by the server and opens Shopify checkout. */}
+          <Route path="/cart" element={<Checkout />} />
           <Route path="/account" element={<Account />} />
           <Route path="/account/callback" element={<AccountCallback />} />
           <Route path="*" element={<NotFound />} />
@@ -68,7 +70,7 @@ export default function App() {
       </main>
       {!isProduct && <Footer />}
       {/* Product pages have their own WhatsApp button; on the cart it would cover the checkout button. */}
-      {!isProduct && pathname !== '/checkout' && <WhatsAppButton />}
+      {!isProduct && pathname !== '/cart' && <WhatsAppButton />}
       <CartDrawer />
     </>
   )

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { CATEGORY_INFO, LOW_STOCK_AT, activeSaleEnd, discount, formatPrice, getProduct, getProductById, getRelated, getStock, isLive, lowStock, saleExpired, shortTitle, summary } from '../lib/catalog'
-import { track } from '../lib/analytics'
+import { trackProductView } from '../lib/analytics'
 import { fetchComplementaryHandles } from '../lib/shopify'
 import { fetchReviews, submitReview } from '../lib/reviews'
 import { useProductSeo } from '../lib/seo'
@@ -1132,8 +1132,10 @@ function ProductPage({ product }) {
   // Switching to a pack with less stock lowers the chosen quantity to fit.
   const shownQty = Math.min(qty, Math.max(1, maxQty))
 
+  // Once per product, with the pack shown when the page opens.
   useEffect(() => {
-    track('view_item', [{ product, variant: product.variants[0], qty: 1 }])
+    trackProductView(product, variant)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [product])
   // The mobile design has no quantity stepper, so a mobile buy is one pack.
   const buyQty = m ? 1 : shownQty
@@ -1148,7 +1150,7 @@ function ProductPage({ product }) {
   const buyNow = () => {
     if (soldOut) return
     add(product, buyQty, { openDrawer: false, variantId: sel?.id })
-    navigate('/checkout')
+    navigate('/cart')
   }
   const buy = {
     pack, setPack, qty: shownQty, setQty, selPrice: m && !sel ? page.price : selPrice, addToCart, buyNow, added,

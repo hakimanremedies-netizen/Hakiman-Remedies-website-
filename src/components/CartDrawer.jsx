@@ -7,7 +7,7 @@ import QtyStepper from './QtyStepper'
 import ShipProgress from './ShipProgress'
 
 export default function CartDrawer() {
-  const { items, open, setOpen, subtotal, mrpTotal, count, setQty, remove } = useCart()
+  const { items, open, setOpen, subtotal, mrpTotal, count, setQty, remove, pending, error, loading } = useCart()
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -43,7 +43,11 @@ export default function CartDrawer() {
           </button>
         </header>
 
-        {items.length === 0 ? (
+        {items.length === 0 && (loading || pending) ? (
+          <div className="cart-empty" role="status">
+            <p>Loading your cart…</p>
+          </div>
+        ) : items.length === 0 ? (
           <div className="cart-empty">
             <img src="/assets/fab.png" alt="" width="96" height="96" />
             <p className="cart-empty__title">Your cart is empty</p>
@@ -56,7 +60,7 @@ export default function CartDrawer() {
           <>
             <ul className="cart-lines">
               {items.map((i) => (
-                <li key={i.variantId} className="cart-line">
+                <li key={i.variantId} className={`cart-line${i.pending ? ' is-pending' : ''}`}>
                   <Link to={`/products/${i.product.handle}`} onClick={() => setOpen(false)} className="cart-line__img">
                     <img src={i.product.images[0]} alt={i.product.title} />
                   </Link>
@@ -89,8 +93,9 @@ export default function CartDrawer() {
             </ul>
 
             <footer className="cart-drawer__foot">
+              {error && <p className="cart-error" role="alert">{error}</p>}
               <ShipProgress subtotal={subtotal} />
-              <dl className="cart-totals">
+              <dl className={`cart-totals${pending ? ' is-pending' : ''}`} aria-busy={pending || undefined}>
                 <div>
                   <dt>Subtotal</dt>
                   <dd>{formatPrice(subtotal)}</dd>
@@ -107,7 +112,7 @@ export default function CartDrawer() {
                 className="btn btn--primary btn--block"
                 onClick={() => {
                   setOpen(false)
-                  navigate('/checkout')
+                  navigate('/cart')
                 }}
               >
                 Checkout · {formatPrice(subtotal)}

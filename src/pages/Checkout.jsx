@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useCart } from '../lib/cart'
+import { trackCartView } from '../lib/analytics'
 import { formatPrice, shortTitle, variantLabel } from '../lib/catalog'
 import QtyStepper from '../components/QtyStepper'
 import Icon from '../components/Icon'
@@ -9,21 +10,33 @@ import ShipProgress from '../components/ShipProgress'
 // Cart review. With Shopify connected, the button hands off to Shopify's hosted
 // checkout; without it this page is a demo that never collects payment details.
 export default function Checkout() {
-  const { items, subtotal, mrpTotal, setQty, remove, count, checkout } = useCart()
+  const { items, subtotal, mrpTotal, setQty, remove, count, checkout, loading, pending, error: cartError, analyticsCart } = useCart()
   const [redirecting, setRedirecting] = useState(false)
   const [error, setError] = useState(null)
   const [code, setCode] = useState('')
   const [codeError, setCodeError] = useState(null)
+  // The code Shopify didn't accept yet; pressing the button again continues with it.
+  const [warnedCode, setWarnedCode] = useState(null)
   const savings = mrpTotal - subtotal
 
+  // Cart viewed, once the cart has loaded and settled.
+  const viewed = useRef(false)
+  useEffect(() => {
+    if (viewed.current || loading || pending) return
+    viewed.current = true
+    trackCartView(analyticsCart)
+  }, [loading, pending, analyticsCart])
+
   const goToCheckout = async () => {
+    const typed = code.trim()
     setRedirecting(true)
     setError(null)
     setCodeError(null)
     try {
-      const cart = await checkout(code.trim())
+      const cart = await checkout(typed, { force: Boolean(typed) && typed === warnedCode })
       if (cart.codeApplicable === false) {
-        setCodeError(`“${code.trim()}” isn’t valid for this cart. Check the code, or continue without it.`)
+        setWarnedCode(typed)
+        setCodeError(`“${typed}” doesn’t apply to this cart yet. Some codes (like free shipping) only apply once you enter your address at checkout. Press the button again to continue with it, or clear the code.`)
         setRedirecting(false)
       }
     } catch (err) {
@@ -31,6 +44,15 @@ export default function Checkout() {
       setError('We couldn’t start checkout. Please try again in a moment.')
       setRedirecting(false)
     }
+  }
+
+  if (!items.length && (loading || pending)) {
+    return (
+      <div className="page container checkout-empty" role="status">
+        <h1>Your cart</h1>
+        <p>Loading your cart…</p>
+      </div>
+    )
   }
 
   if (!items.length) {
@@ -60,7 +82,7 @@ export default function Checkout() {
         <section aria-label="Cart items">
           <ul className="cart-lines checkout__lines">
             {items.map((i) => (
-              <li key={i.variantId} className="cart-line">
+              <li key={i.variantId} className={`cart-line${i.pending ? ' is-pending' : ''}`}>
                 <Link to={`/products/${i.product.handle}`} className="cart-line__img">
                   <img src={i.product.images[0]} alt={i.product.title} />
                 </Link>
@@ -87,7 +109,8 @@ export default function Checkout() {
 
         <aside className="checkout__panel" aria-labelledby="summary-title">
           <h2 id="summary-title">Order summary</h2>
-          <dl className="cart-totals">
+          {cartError && <p className="cart-error" role="alert">{cartError}</p>}
+          <dl className={`cart-totals${pending ? ' is-pending' : ''}`} aria-busy={pending || undefined}>
             <div><dt>MRP total</dt><dd>{formatPrice(mrpTotal)}</dd></div>
             {savings > 0 && (
               <div className="cart-totals__save"><dt>Discount on MRP</dt><dd>− {formatPrice(savings)}</dd></div>
@@ -105,7 +128,7 @@ export default function Checkout() {
                 <input
                   id="discount-code"
                   value={code}
-                  onChange={(e) => { setCode(e.target.value); setCodeError(null) }}
+                  onChange={(e) => { setCode(e.target.value); setCodeError(null); setWarnedCode(null) }}
                   autoComplete="off"
                   spellCheck="false"
                   aria-describedby={codeError ? 'discount-code-msg' : undefined}
@@ -123,7 +146,7 @@ export default function Checkout() {
             disabled={!checkout || redirecting}
             aria-describedby={checkout ? undefined : 'checkout-note'}
           >
-            <Icon name="lock" size={18} /> {redirecting ? 'Opening secure checkout…' : 'Proceed to checkout'}
+            <Icon name="lock" size={18} /> {redirecting ? 'Opening secure checkout…' : warnedCode && warnedCode === code.trim() ? 'Continue to checkout with this code' : 'Proceed to checkout'}
           </button>
           {error && <p className="checkout__error" role="alert">{error}</p>}
           {!checkout && <p id="checkout-note" className="fine">Not available in this prototype — requires Shopify connection.</p>}

@@ -12,6 +12,7 @@
     "shopify:import": "node --env-file-if-exists=.env.local scripts/shopify-import.mjs"
   },
   "dependencies": {
+    "@shopify/hydrogen": "2026.10.3",
     "gsap": "^3.15.0",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",

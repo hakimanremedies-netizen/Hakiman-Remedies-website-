@@ -29,6 +29,6 @@ ${urls.map((u) => `  <url><loc>${SITE}${u}</loc></url>`).join('\n')}
 await writeFile(path.join(ROOT, 'public/sitemap.xml'), xml)
 await writeFile(
   path.join(ROOT, 'public/robots.txt'),
-  `User-agent: *\nDisallow: /checkout\nDisallow: /account\n\nSitemap: ${SITE}/sitemap.xml\n`,
+  `User-agent: *\nDisallow: /checkout\nDisallow: /cart\nDisallow: /account\nDisallow: /api/\nDisallow: /__shopify/\n\nSitemap: ${SITE}/sitemap.xml\n`,
 )
 console.log(`sitemap: ${urls.length} URLs`)

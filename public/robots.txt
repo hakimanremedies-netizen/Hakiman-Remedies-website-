@@ -1,5 +1,8 @@
 User-agent: *
 Disallow: /checkout
+Disallow: /cart
 Disallow: /account
+Disallow: /api/
+Disallow: /__shopify/
 
 Sitemap: https://www.thehakiman.com/sitemap.xml

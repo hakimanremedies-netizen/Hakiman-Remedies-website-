@@ -392,6 +392,9 @@ p { margin: 0 0 1em; }
 .checkout__saving { margin: 4px 0 20px; padding: 8px 12px; border-radius: var(--radius-sm); background: var(--sage); color: var(--green-ink); font-size: 0.85rem; font-weight: 600; }
 .checkout__panel .btn--lg { gap: 10px; margin-top: 6px; }
 .checkout__error { margin: 10px 0 0; color: #9a3b2a; font-size: 0.86rem; }
+/* Shopify is still confirming these values: keep them in place, visibly unconfirmed. */
+.cart-line.is-pending, .cart-totals.is-pending dd { opacity: 0.5; transition: opacity 0.15s; }
+.cart-error { margin: 0 0 12px; color: #9a3b2a; font-size: 0.86rem; }
 .checkout__panel .fine { margin: 10px 0 0; text-align: center; }
 .checkout__trust { list-style: none; margin: 22px 0 0; padding: 18px 0 0; border-top: 1px solid var(--line); display: grid; gap: 12px; }
 .checkout__trust li { display: grid; grid-template-columns: 18px 1fr; gap: 10px; align-items: start; font-size: 0.84rem; color: #4d4f46; line-height: 1.45; }
